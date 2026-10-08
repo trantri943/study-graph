@@ -9,7 +9,7 @@
 /* Layout: full-screen canvas graph (Obsidian-style), floating search + panel. Single dark theme by choice. */
 :root{
   --bg:#000; --panel:rgba(22,22,30,.92); --line:#2a2a36; --fg:#e7e6ee; --muted:#8d8b9c;
-  --accent:#8b7cf6;
+  --accent:#8b7cf6; --mastered:#3ddc84; --learning:#f5c542; --weak:#ff5c5c;
   --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
   color-scheme:dark;
 }
@@ -28,17 +28,28 @@ input:focus-visible{outline:none;border-color:var(--accent)}
 .legend span{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 .legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
 .legend span.off{opacity:.35}
-.panel{position:fixed;right:16px;top:calc(64px + env(safe-area-inset-top,0px));width:min(300px,calc(100% - 32px));background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;backdrop-filter:blur(8px);max-height:60vh;overflow:auto}
+.panel{position:fixed;right:16px;top:calc(64px + env(safe-area-inset-top,0px));width:min(320px,calc(100% - 32px));box-sizing:border-box;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;backdrop-filter:blur(8px);max-height:calc(100% - 140px);overflow:auto}
 .panel h2{margin:0 0 2px;font-size:17px;font-weight:600;text-wrap:balance}
-.panel .grp{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.panel ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.panel li{font-size:13px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;cursor:pointer}
-.panel li:hover{border-color:var(--accent)}
-.panel label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px}
-.panel input{width:100%;max-width:none;box-sizing:border-box}
-.row{display:flex;gap:8px;margin-top:12px}
+.panel .grp{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.badge{font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:none;color:var(--fg);border:1px solid var(--accent);border-radius:999px;padding:1px 8px}
+.panel h3{font-size:11px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:12px 0 4px;font-weight:400}
+.panel p{margin:0;font-size:14px;line-height:1.5}
+.panel ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.panel li{font-size:13px;line-height:1.45}
+.panel li a{color:var(--fg);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px;cursor:pointer}
+.panel li a:hover{text-decoration-color:var(--accent)}
+.rel{font-family:var(--mono);font-size:11px;color:var(--accent)}
+.row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.row button{font-size:13px;padding:6px 10px}
+.st.on[data-s="mastered"]{border-color:var(--mastered)}
+.st.on[data-s="learning"]{border-color:var(--learning)}
+.st.on[data-s="weak"]{border-color:var(--weak)}
 .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45}
 .stat{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(56px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:8px 14px;font-size:13px}
+.err{position:fixed;inset:0;display:grid;place-items:center;padding:16px;text-align:center;color:var(--muted);font-size:14px;line-height:1.5}
+@media (max-width:520px){.panel{top:auto;left:16px;width:auto;bottom:calc(40px + env(safe-area-inset-bottom,0px));max-height:48%}}
+textarea{width:100%;box-sizing:border-box;height:140px;font-family:var(--mono);font-size:11px;color:var(--fg);background:#000;border:1px solid var(--line);border-radius:8px;padding:8px}
 </style>
 </head>
 <body>
@@ -46,202 +57,69 @@ input:focus-visible{outline:none;border-color:var(--accent)}
 <canvas id="c"></canvas>
 <div class="top">
   <input id="q" placeholder="Tìm môn / khái niệm…" autocomplete="off">
-  <button id="addBtn">+ Thêm</button>
   <button id="fitBtn">Căn giữa</button>
+  <button id="allBtn" hidden>Xem toàn bộ</button>
+  <button id="exportBtn">Xuất dữ liệu</button>
   <span class="stat" id="stat"></span>
 </div>
 <div class="legend" id="legend"></div>
 <div class="panel" id="info" hidden></div>
-<div class="panel" id="add" hidden>
-  <h2>Thêm khái niệm</h2>
-  <label for="nName">Tên</label><input id="nName" placeholder="VD: Fourier Transform">
-  <label for="nLinks">Nối tới (cách nhau bằng dấu phẩy)</label><input id="nLinks" placeholder="VD: Calculus, Signals & Systems">
-  <div class="row"><button id="saveAdd">Lưu</button><button id="cancelAdd">Đóng</button><button id="resetBtn">Reset mẫu</button></div>
-  <div class="hint" id="addMsg">Thay đổi được lưu trong trình duyệt này.</div>
-</div>
+<div class="toast" id="toast" hidden></div>
 
 <script>
-// ---------- Sample data: subjects → topics → concepts ----------
-const GROUPS = {
-  "Math":"#4f7cff","Physics":"#7ff0e0","Chemistry":"#9fd8ff","Electrical Eng.":"#3a5df0",
-  "Semiconductors":"#7a4dff","Computer Science":"#e3a8ff","AI / ML":"#5fb4ff","English":"#a6fff0"
-};
-const TREE = {
-  "Math":{"Calculus":["Limits","Derivatives","Integrals","Series","Multivariable Calculus"],
-          "Linear Algebra":["Vectors","Matrices","Eigenvalues","SVD","Vector Spaces"],
-          "Probability":["Random Variables","Bayes' Rule","Distributions","Expectation"],
-          "Differential Equations":["ODEs","PDEs","Laplace Transform"],
-          "Discrete Math":["Logic","Graph Theory","Combinatorics","Boolean Algebra"]},
-  "Physics":{"Mechanics":["Newton's Laws","Energy","Momentum","Oscillations"],
-          "Electromagnetism":["Electric Field","Magnetic Field","Maxwell's Equations","Capacitance"],
-          "Quantum Mechanics":["Wavefunction","Schrödinger Equation","Tunneling","Energy Levels"],
-          "Thermodynamics":["Entropy","Heat Transfer","Boltzmann Distribution"],
-          "Solid State Physics":["Crystal Lattice","Band Theory","Fermi Level","Phonons"]},
-  "Chemistry":{"Atomic Structure":["Electron Configuration","Periodic Table","Orbitals"],
-          "Chemical Bonding":["Covalent Bonds","Ionic Bonds","Metallic Bonds"],
-          "Materials Chemistry":["Silicon","Dopants","Oxidation","Etching Chemistry"]},
-  "Electrical Eng.":{"Circuit Analysis":["Ohm's Law","KCL / KVL","RC Circuits","Thevenin"],
-          "Analog Circuits":["Op-Amps","Amplifiers","Filters","Feedback"],
-          "Digital Logic":["Logic Gates","Flip-Flops","FSM","Timing"],
-          "Signals & Systems":["Fourier Transform","Sampling","Convolution","Z-Transform"]},
-  "Semiconductors":{"Device Physics":["PN Junction","MOSFET","Threshold Voltage","Leakage Current","FinFET","GAA"],
-          "Fabrication":["Lithography","Deposition","CMP","Ion Implantation","Wafer"],
-          "Physical Design":["Floorplanning","Placement","Clock Tree Synthesis","Routing","STA","DRC / LVS","Power Grid"],
-          "VLSI Design":["CMOS Inverter","Standard Cells","RTL","Synthesis","PPA"]},
-  "Computer Science":{"Programming":["Python","C / C++","Tcl","Shell Scripting"],
-          "Algorithms":["Sorting","Graph Search","Dynamic Programming","Big-O"],
-          "Data Structures":["Arrays","Trees","Hash Tables","Graphs"],
-          "Computer Architecture":["CPU Pipeline","Cache","Memory Hierarchy","ISA"]},
-  "AI / ML":{"Machine Learning":["Regression","Classification","Gradient Descent","Overfitting"],
-          "Deep Learning":["Neural Networks","Backpropagation","CNN","Transformers"],
-          "AI Hardware":["GPU","TPU / NPU","AI Accelerators","HBM Memory"],
-          "AI for Chip Design":["ML-based Placement","EDA Automation","LLM Agents"]},
-  "English":{"Vocabulary":["Technical Vocabulary","Collocations","Word Roots"],
-          "Academic Writing":["Paragraph Structure","Research Papers","Citations"],
-          "Speaking":["Presentations","Interview Skills","Pronunciation"]}
-};
-const CROSS = [
- ["Derivatives","Newton's Laws"],["Integrals","Energy"],["Differential Equations","RC Circuits"],["Laplace Transform","Signals & Systems"],
- ["Linear Algebra","Neural Networks"],["Matrices","Circuit Analysis"],["Eigenvalues","Quantum Mechanics"],["SVD","Machine Learning"],
- ["Probability","Machine Learning"],["Bayes' Rule","Classification"],["Boltzmann Distribution","Fermi Level"],["Boltzmann Distribution","Leakage Current"],
- ["Gradient Descent","Derivatives"],["Backpropagation","Derivatives"],["Boolean Algebra","Logic Gates"],["Graph Theory","Routing"],
- ["Graph Theory","Graph Search"],["Graph Search","Routing"],["Graphs","Graph Theory"],["Combinatorics","Placement"],
- ["Electric Field","PN Junction"],["Capacitance","MOSFET"],["Capacitance","RC Circuits"],["Maxwell's Equations","Signals & Systems"],
- ["Tunneling","Leakage Current"],["Band Theory","PN Junction"],["Energy Levels","Band Theory"],["Crystal Lattice","Silicon"],
- ["Wavefunction","Schrödinger Equation"],["Heat Transfer","Power Grid"],["Entropy","Thermodynamics"],
- ["Electron Configuration","Band Theory"],["Covalent Bonds","Silicon"],["Dopants","PN Junction"],["Dopants","Ion Implantation"],
- ["Oxidation","Deposition"],["Etching Chemistry","Lithography"],["Silicon","Wafer"],["Metallic Bonds","Routing"],
- ["Ohm's Law","Leakage Current"],["RC Circuits","STA"],["Timing","STA"],["Flip-Flops","Clock Tree Synthesis"],["FSM","RTL"],
- ["Logic Gates","Standard Cells"],["Op-Amps","Feedback"],["Sampling","Fourier Transform"],["Convolution","CNN"],
- ["MOSFET","CMOS Inverter"],["Threshold Voltage","MOSFET"],["FinFET","GAA"],["FinFET","Lithography"],["PPA","Floorplanning"],
- ["Synthesis","Placement"],["Standard Cells","Placement"],["Tcl","Physical Design"],["Python","EDA Automation"],["Shell Scripting","EDA Automation"],
- ["C / C++","Algorithms"],["Dynamic Programming","Routing"],["Big-O","Algorithms"],["Trees","Clock Tree Synthesis"],["Hash Tables","Cache"],
- ["CPU Pipeline","Timing"],["Memory Hierarchy","HBM Memory"],["ISA","RTL"],["Cache","GPU"],
- ["GPU","Neural Networks"],["AI Accelerators","VLSI Design"],["TPU / NPU","Transformers"],["ML-based Placement","Placement"],
- ["ML-based Placement","Machine Learning"],["LLM Agents","Transformers"],["EDA Automation","Physical Design"],["Transformers","Neural Networks"],
- ["Technical Vocabulary","Physical Design"],["Technical Vocabulary","Semiconductors"],["Research Papers","AI / ML"],["Research Papers","Device Physics"],
- ["Presentations","Academic Writing"],["Interview Skills","Physical Design"],["Interview Skills","Algorithms"],["Word Roots","Technical Vocabulary"],
- ["Solid State Physics","Device Physics"],["Quantum Mechanics","Device Physics"],["Digital Logic","VLSI Design"],["Computer Architecture","AI Hardware"],
- ["Materials Chemistry","Fabrication"],["Electromagnetism","Analog Circuits"],["Calculus","Physics"],["Linear Algebra","AI / ML"]
-];
-
-const LEAVES = {
- "Derivatives":["Chain Rule","Product Rule","Partial Derivative","Gradient","Jacobian"],
- "Integrals":["Riemann Sum","Integration by Parts","Area Under Curve","Double Integral"],
- "Series":["Taylor Series","Power Series","Convergence","Fourier Series"],
- "Matrices":["Matrix Multiplication","Determinant","Inverse Matrix","Transpose","Identity Matrix"],
- "Eigenvalues":["Eigenvectors","Diagonalization","Characteristic Polynomial","PCA"],
- "Distributions":["Normal Distribution","Poisson","Binomial","Uniform","Gaussian Noise"],
- "ODEs":["First-Order ODE","Second-Order ODE","Initial Conditions","Damping"],
- "Graph Theory":["Shortest Path","Spanning Tree","Steiner Tree","Graph Coloring","Min-Cut"],
- "Newton's Laws":["Force","Mass","Acceleration","Inertia"],
- "Energy":["Kinetic Energy","Potential Energy","Work","Power"],
- "Electric Field":["Coulomb's Law","Gauss's Law","Electric Potential","Drift"],
- "Magnetic Field":["Lorentz Force","Inductance","Faraday's Law","Ampère's Law"],
- "Band Theory":["Conduction Band","Valence Band","Band Gap","Effective Mass","Holes"],
- "Crystal Lattice":["Unit Cell","Miller Indices","Defects","Diamond Lattice"],
- "Fermi Level":["Fermi-Dirac","Intrinsic Carrier","Quasi-Fermi Level","Work Function"],
- "Tunneling":["Barrier Height","Gate Tunneling","Band-to-Band Tunneling"],
- "Silicon":["Monocrystalline Si","Polysilicon","SiO2","Strained Silicon"],
- "Dopants":["Boron","Phosphorus","Arsenic","n-type","p-type"],
- "Ohm's Law":["Resistance","Resistivity","Voltage","Current"],
- "RC Circuits":["Time Constant","RC Delay","Charging Curve","Elmore Delay"],
- "Op-Amps":["Inverting Amp","Non-inverting Amp","Gain","Bandwidth","Slew Rate"],
- "Filters":["Low-pass","High-pass","Band-pass","Cutoff Frequency"],
- "Flip-Flops":["D Flip-Flop","Latch","Setup Time","Hold Time","Clock-to-Q"],
- "Fourier Transform":["FFT","Frequency Domain","Spectrum","Nyquist"],
- "MOSFET":["Gate","Source","Drain","Channel","Gate Oxide","Saturation Region","Linear Region"],
- "PN Junction":["Depletion Region","Built-in Potential","Forward Bias","Reverse Bias","Diode"],
- "Leakage Current":["Subthreshold Leakage","Gate Leakage","Static Power","Junction Leakage"],
- "FinFET":["Fin Height","Fin Pitch","Multi-gate","Short-channel Effects"],
- "Lithography":["EUV","DUV","Photoresist","Mask","Overlay","Multi-patterning"],
- "Deposition":["CVD","PVD","ALD","Epitaxy"],
- "Wafer":["300mm Wafer","Die","Yield","Scribe Line"],
- "Floorplanning":["Die Size","Macro Placement","Aspect Ratio","Utilization","IO Placement","Blockages"],
- "Placement":["Global Placement","Legalization","Detailed Placement","Congestion","Wirelength","Density"],
- "Clock Tree Synthesis":["Clock Skew","Clock Latency","Clock Buffers","H-Tree","Useful Skew"],
- "Routing":["Global Routing","Detailed Routing","Metal Layers","Vias","Track Assignment","Crosstalk"],
- "STA":["Setup Time","Hold Time","Slack","Critical Path","SDC Constraints","OCV","Corners"],
- "DRC / LVS":["Spacing Rules","Width Rules","Antenna Effect","Netlist Compare","Density Rules"],
- "Power Grid":["IR Drop","Electromigration","Power Rings","Power Stripes","Decap Cells"],
- "CMOS Inverter":["NMOS","PMOS","Switching Threshold","Dynamic Power","Static Power"],
- "Standard Cells":["NAND","NOR","Buffer","Cell Library","Liberty File","Tie Cells"],
- "Synthesis":["Netlist","Logic Optimization","Technology Mapping","Gate Count"],
- "PPA":["Power","Performance","Area"],
- "Python":["NumPy","Pandas","Matplotlib","Scripts"],
- "Tcl":["Tcl Procs","Innovus Commands","ICC2 Commands","Tcl Lists"],
- "Graph Search":["BFS","DFS","Dijkstra","A* Search","Maze Routing"],
- "Dynamic Programming":["Memoization","Knapsack","Edit Distance"],
- "Cache":["L1 Cache","L2 Cache","Cache Miss","SRAM"],
- "CPU Pipeline":["Fetch","Decode","Execute","Hazards","Branch Prediction"],
- "Neural Networks":["Neuron","Activation Function","Weights","Layers","Loss Function"],
- "Transformers":["Attention","Self-Attention","Embeddings","Tokens","LLM"],
- "Gradient Descent":["Learning Rate","SGD","Adam","Loss Landscape"],
- "GPU":["CUDA","Parallelism","Tensor Cores","VRAM"],
- "AI Accelerators":["Systolic Array","MAC Units","Dataflow","On-chip SRAM"],
- "Technical Vocabulary":["Throughput","Latency","Yield","Tape-out","Sign-off","Node (nm)"],
- "Presentations":["Slide Structure","Storytelling","Q&A"],
- "Interview Skills":["STAR Method","Tell Me About Yourself","Behavioral Questions","Technical Questions"],
- "Pronunciation":["Stress","Intonation","Linking Sounds"],
- "Research Papers":["Abstract","Methodology","Results","Literature Review"]
-};
-function buildSample(){
-  const nodes=[],links=[],seen=new Set();
-  const add=(id,group,level)=>{ if(!seen.has(id)){seen.add(id);nodes.push({id,group,level});} };
-  for(const [subj,topics] of Object.entries(TREE)){
-    add(subj,subj,0);
-    for(const [topic,cons] of Object.entries(topics)){
-      add(topic,subj,1); links.push([subj,topic]);
-      for(const c of cons){ add(c,subj,2); links.push([topic,c]); }
-    }
-  }
-  for(const [p,ls] of Object.entries(LEAVES)){ const g=nodes.find(n=>n.id===p); if(!g) continue;
-    for(const l of ls){ add(l,g.group,3); links.push([p,l]); } }
-  for(const [a,b] of CROSS) if(seen.has(a)&&seen.has(b)) links.push([a,b]);
-  return {nodes,links,custom:[]};
-}
-
-// ---------- State (with per-browser save of user additions) ----------
-const KEY="study-graph-custom-v1";
-let custom=[]; try{custom=JSON.parse(localStorage.getItem(KEY)||"[]")}catch(e){custom=[]}
-let N=[],L=[],byId=new Map(),adj=new Map();
+// ---------- Data (loaded from data.json) ----------
+let GROUPS={}, NOTES={};
+const color=g=>(GROUPS[g]&&GROUPS[g].color)||"#bbb";
+const STATUS_KEY="study-graph-status-v1";
+const STATUS_COLOR={mastered:"#3ddc84",learning:"#f5c542",weak:"#ff5c5c"};
+let status={};          // merged: data.json status + localStorage (newer lastReviewed wins)
+let localStatus={};     // what this browser changed
+let N=[],L=[],byId=new Map(),adj=new Map(),edgesOf=new Map();
 const hidden=new Set();
+let localRoot=null, localSet=null;  // local graph: node + neighbours within 2 steps
 
-function rebuild(keepPos){
-  const old=new Map(N.map(n=>[n.id,n]));
-  const d=buildSample();
-  for(const c of custom){
-    if(!d.nodes.find(n=>n.id===c.id)) d.nodes.push({id:c.id,group:"Mine",level:2});
-    for(const t of c.links) d.links.push([c.id,t]);
-  }
-  N=d.nodes.map(n=>{const o=keepPos&&old.get(n.id);return Object.assign(n,o?{x:o.x,y:o.y,vx:0,vy:0}:{x:(Math.random()-.5)*800,y:(Math.random()-.5)*800,vx:0,vy:0})});
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+
+function init(data){
+  GROUPS=data.groups||{}; NOTES=data.notes||{};
+  try{localStatus=JSON.parse(localStorage.getItem(STATUS_KEY)||"{}")||{}}catch(e){localStatus={}}
+  status=Object.assign({},data.status||{});
+  for(const [k,v] of Object.entries(localStatus)){
+    const cur=status[k]; if(!cur||(v.lastReviewed||"")>=(cur.lastReviewed||"")) status[k]=v; }
+
+  N=(data.nodes||[]).map(n=>({id:n.id,group:n.group,parent:n.parent||null,level:n.level||"",
+    x:(Math.random()-.5)*400,y:(Math.random()-.5)*400,vx:0,vy:0}));
   byId=new Map(N.map(n=>[n.id,n]));
-  L=[];adj=new Map(N.map(n=>[n.id,new Set()]));
-  for(const [a,b] of d.links){ if(!byId.has(b)) continue; if(adj.get(a).has(b)) continue;
-    L.push({s:byId.get(a),t:byId.get(b)}); adj.get(a).add(b); adj.get(b).add(a); }
-  for(const n of N){ n.deg=adj.get(n.id).size; n.r=n.level===3?1.4:1.2+Math.sqrt(n.deg)*1.5; }
+  for(const n of N){ // depth from parent chain (0 = group root)
+    let d=0,p=n.parent,guard=0; while(p&&byId.has(p)&&guard++<50){d++;p=byId.get(p).parent} n.depth=d; }
+  adj=new Map(N.map(n=>[n.id,new Set()])); edgesOf=new Map(N.map(n=>[n.id,[]])); L=[];
+  const addEdge=(a,b,relation,note,tree)=>{
+    if(!byId.has(a)||!byId.has(b)||a===b||adj.get(a).has(b)) return;
+    const l={s:byId.get(a),t:byId.get(b),relation:relation||"",note:note||"",tree};
+    L.push(l); adj.get(a).add(b); adj.get(b).add(a); edgesOf.get(a).push(l); edgesOf.get(b).push(l); };
+  for(const n of N) if(n.parent) addEdge(n.parent,n.id,"","",true);
+  for(const l of data.links||[]) addEdge(l.source,l.target,l.relation,l.note,false);
+  for(const n of N){ n.deg=adj.get(n.id).size; n.r=[7,5,4][n.depth]||3; n.r+=Math.sqrt(n.deg)*0.6; }
   document.getElementById("stat").textContent=N.length+" nodes · "+L.length+" links";
-  alpha=1; drawLegend();
+  drawLegend();
+  alpha=1; for(let i=0;i<500;i++) tick(); alpha=0.05;
+  view=fitView();
 }
-GROUPS["Mine"]="#ffb86c";
-const color=g=>GROUPS[g]||"#bbb";
 
 // ---------- Force simulation (no library) ----------
 let alpha=1;
+const isVis=n=>!hidden.has(n.group)&&(!localSet||localSet.has(n.id));
 function tick(){
   if(alpha<0.005) return;
-  const vis=N.filter(n=>!hidden.has(n.group));
-  // repulsion
+  const vis=N.filter(isVis);
   for(let i=0;i<vis.length;i++){const a=vis[i];
     for(let j=i+1;j<vis.length;j++){const b=vis[j];
       let dx=b.x-a.x,dy=b.y-a.y,d2=dx*dx+dy*dy+0.01;
       if(d2>250000) continue;
-      const f=-110*alpha/d2; dx*=f;dy*=f; a.vx+=dx;a.vy+=dy;b.vx-=dx;b.vy-=dy;}}
-  // springs
-  for(const l of L){ if(hidden.has(l.s.group)||hidden.has(l.t.group)) continue;
+      const f=-900*alpha/d2; dx*=f;dy*=f; a.vx+=dx;a.vy+=dy;b.vx-=dx;b.vy-=dy;}}
+  for(const l of L){ if(!isVis(l.s)||!isVis(l.t)) continue;
     const dx=l.t.x-l.s.x,dy=l.t.y-l.s.y,d=Math.sqrt(dx*dx+dy*dy)||1;
-    const lv=Math.min(l.s.level,l.t.level),leaf=l.s.level===3||l.t.level===3;
-    const rest=leaf?14:lv===0?70:36;
+    const rest=l.tree?(Math.min(l.s.depth,l.t.depth)===0?90:60):80;
     const k=(d-rest)/d*0.06*alpha; l.s.vx+=dx*k;l.s.vy+=dy*k;l.t.vx-=dx*k;l.t.vy-=dy*k;}
   for(const n of vis){ n.vx-=n.x*0.008*alpha; n.vy-=n.y*0.008*alpha;
     if(n===drag){n.vx=n.vy=0;continue}
@@ -249,46 +127,82 @@ function tick(){
   alpha*=0.985;
 }
 
-// ---------- Rendering ----------
+// ---------- Camera (smooth fly) ----------
 const cv=document.getElementById("c"),ctx=cv.getContext("2d");
-let W,H,dpr,view={x:0,y:0,k:0.7};
+let W,H,dpr,view={x:0,y:0,k:1},anim=null;
 function resize(){dpr=devicePixelRatio||1;W=innerWidth;H=innerHeight;cv.width=W*dpr;cv.height=H*dpr;}
 addEventListener("resize",resize);resize();
-let hover=null,selected=null,query="";
-function focusSet(){
-  const f=selected||hover; if(!f) return null;
-  const s=new Set(adj.get(f.id)); s.add(f.id); return s;
+const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+function flyTo(target,ms=600){anim={from:{...view},to:target,t0:performance.now(),ms}}
+function stepAnim(now){ if(!anim) return;
+  const t=Math.min(1,(now-anim.t0)/anim.ms),e=ease(t),a=anim.from,b=anim.to;
+  view={x:a.x+(b.x-a.x)*e,y:a.y+(b.y-a.y)*e,k:a.k+(b.k-a.k)*e}; if(t>=1) anim=null; }
+const fontPx=n=>[15,13,11.5][n.depth]||10.5;
+function fitView(){
+  const vis=N.filter(isVis); if(!vis.length) return {...view};
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  for(const n of vis){x0=Math.min(x0,n.x-n.r);x1=Math.max(x1,n.x+n.r);y0=Math.min(y0,n.y-n.r);y1=Math.max(y1,n.y+n.r)}
+  // margins in screen px: room for labels, top bar, legend
+  const padX=Math.min(110,W*0.18),padTop=80,padBot=70;
+  const k=Math.max(0.15,Math.min((W-2*padX)/Math.max(x1-x0,1),(H-padTop-padBot)/Math.max(y1-y0,1),2.5));
+  const cx=(x0+x1)/2,cy=(y0+y1)/2;
+  return {k,x:-cx*k,y:-cy*k+(padTop-padBot)/2};
 }
-function draw(){
+function flyToNode(n){const k=Math.max(view.k,1.2);
+  // keep the node clear of the panel: right-side panel on desktop, bottom sheet on phones
+  const narrow=W<=520, dx=narrow?0:-Math.min(170,W*0.15), dy=narrow?-H*0.22:0;
+  flyTo({k,x:-n.x*k+dx,y:-n.y*k+dy})}
+
+// ---------- Rendering ----------
+let hover=null,selected=null,query="";
+function focusSet(){ const f=hover; if(!f) return null;  // only hover dims unrelated nodes
+  const s=new Set(adj.get(f.id)); s.add(f.id); return s; }
+function draw(now){
+  stepAnim(now);
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);
   ctx.setTransform(dpr*view.k,0,0,dpr*view.k,dpr*(W/2+view.x),dpr*(H/2+view.y));
-  const fs=focusSet(), q=query.toLowerCase();
-  ctx.lineWidth=0.6/view.k*1.2;
-  for(const l of L){ if(hidden.has(l.s.group)||hidden.has(l.t.group)) continue;
-    const on=fs&&fs.has(l.s.id)&&fs.has(l.t.id)&&(l.s===(selected||hover)||l.t===(selected||hover));
-    ctx.strokeStyle=on?"rgba(139,124,246,.9)":fs?"rgba(120,120,135,.08)":"rgba(150,150,160,.32)";
+  const f=hover||selected, fs=focusSet(), q=query.toLowerCase();
+  const visCount=N.filter(isVis).length;
+  ctx.lineWidth=1/view.k;
+  for(const l of L){ if(!isVis(l.s)||!isVis(l.t)) continue;
+    const on=f&&(l.s===f||l.t===f);
+    ctx.strokeStyle=on?"rgba(139,124,246,.9)":fs?"rgba(120,120,135,.12)":"rgba(150,150,160,.35)";
     ctx.beginPath();ctx.moveTo(l.s.x,l.s.y);ctx.lineTo(l.t.x,l.t.y);ctx.stroke();}
-  for(const n of N){ if(hidden.has(n.group)) continue;
+  for(const n of N){ if(!isVis(n)) continue;
     const match=q&&n.id.toLowerCase().includes(q);
     const dim=(fs&&!fs.has(n.id))||(q&&!match);
-    ctx.globalAlpha=dim?0.15:1;
-    if(!dim&&(n.level<2||n.deg>=5)){ctx.shadowColor=color(n.group);ctx.shadowBlur=n.level===0?16:8;}
-    ctx.fillStyle=(n.level<=1||n.deg>=5||match)?color(n.group):"#d8d8e0";
-    ctx.beginPath();ctx.arc(n.x,n.y,Math.max(match?n.r+2:n.r,(n.level===3?1.1:1.8)/view.k),0,7);ctx.fill();ctx.shadowBlur=0;
-    const showLabel=(fs&&fs.has(n.id))||match||(n.level===0)||(view.k>1.1&&n.level===1)||view.k>1.9;
-    if(showLabel&&!dim){ctx.fillStyle=n.level===0?"#fff":"#c9c8d6";
-      ctx.font=`${n.level===0?600:400} ${(n.level===0?13:10.5)/Math.max(view.k,0.6)}px IBM Plex Sans, system-ui, sans-serif`;
-      ctx.textAlign="center";ctx.fillText(n.id,n.x,n.y+n.r+12/Math.max(view.k,0.6));}
+    ctx.globalAlpha=dim?0.25:1;
+    const st=status[n.id]&&STATUS_COLOR[status[n.id].status];
+    if(st){ // review-status halo; dot keeps its group colour
+      ctx.shadowColor=st;ctx.shadowBlur=18;ctx.fillStyle=st;ctx.globalAlpha*=0.35;
+      ctx.beginPath();ctx.arc(n.x,n.y,n.r+5/view.k+2,0,7);ctx.fill();
+      ctx.globalAlpha=dim?0.25:1;ctx.shadowBlur=0;
+      ctx.strokeStyle=st;ctx.lineWidth=1.5/view.k;ctx.beginPath();ctx.arc(n.x,n.y,n.r+2.5/view.k,0,7);ctx.stroke();ctx.lineWidth=1/view.k;
+    } else if(!dim&&n.depth<2){ctx.shadowColor=color(n.group);ctx.shadowBlur=n.depth===0?16:8;}
+    ctx.fillStyle=color(n.group);
+    ctx.beginPath();ctx.arc(n.x,n.y,Math.max(match?n.r+2:n.r,1.8/view.k),0,7);ctx.fill();ctx.shadowBlur=0;
+    const showLabel=visCount<=60||(fs&&fs.has(n.id))||match||n.depth===0||(view.k>1.1&&n.depth===1)||view.k>1.9;
+    if(showLabel){ctx.fillStyle=n.depth===0?"#fff":"#c9c8d6";
+      const px=fontPx(n);
+      ctx.font=`${n.depth===0?600:400} ${px/view.k}px IBM Plex Sans, system-ui, sans-serif`;
+      ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillText(n.id,n.x,n.y+n.r+(px+3)/view.k);}
     ctx.globalAlpha=1;}
+  if(f) for(const l of edgesOf.get(f.id)||[]){ // relation labels at edge midpoints
+    if(!l.relation||!isVis(l.s)||!isVis(l.t)) continue;
+    const mx=(l.s.x+l.t.x)/2,my=(l.s.y+l.t.y)/2,px=11/view.k;
+    ctx.font=`500 ${px}px IBM Plex Mono, ui-monospace, monospace`;
+    const w=ctx.measureText(l.relation).width+8/view.k;
+    ctx.fillStyle="rgba(0,0,0,.85)";ctx.fillRect(mx-w/2,my-px*0.85,w,px*1.7);
+    ctx.fillStyle="#b9b0ff";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(l.relation,mx,my);ctx.textBaseline="alphabetic";}
 }
 
 // ---------- Interaction: pan, zoom, drag, tap ----------
 const toWorld=(px,py)=>({x:(px-W/2-view.x)/view.k,y:(py-H/2-view.y)/view.k});
 function pick(px,py){const p=toWorld(px,py);let best=null,bd=1e9;
-  for(const n of N){if(hidden.has(n.group))continue;const d=Math.hypot(n.x-p.x,n.y-p.y);if(d<Math.max(n.r+4,12/view.k)&&d<bd){bd=d;best=n}}return best}
+  for(const n of N){if(!isVis(n))continue;const d=Math.hypot(n.x-p.x,n.y-p.y);if(d<Math.max(n.r+4,14/view.k)&&d<bd){bd=d;best=n}}return best}
 let drag=null,panning=null,pointers=new Map(),pinch=null,moved=false;
-cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;
+cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;anim=null;
   if(pointers.size===2){const [a,b]=[...pointers.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),k:view.k};drag=null;panning=null;return}
   const n=pick(e.clientX,e.clientY); if(n){drag=n;alpha=Math.max(alpha,0.3)} else panning={x:e.clientX-view.x,y:e.clientY-view.y};});
 cv.addEventListener("pointermove",e=>{
@@ -298,63 +212,83 @@ cv.addEventListener("pointermove",e=>{
   if(panning){view.x=e.clientX-panning.x;view.y=e.clientY-panning.y;return}
   if(e.pointerType==="mouse"){hover=pick(e.clientX,e.clientY);cv.style.cursor=hover?"pointer":"grab"}});
 function up(e){pointers.delete(e.pointerId); if(pointers.size<2)pinch=null;
-  if(!moved&&pointers.size===0){const n=pick(e.clientX,e.clientY);select(n)}
+  if(!moved&&pointers.size===0){const n=pick(e.clientX,e.clientY); if(n) open(n); else select(null)}
   drag=null;panning=null;}
 cv.addEventListener("pointerup",up);cv.addEventListener("pointercancel",up);
-cv.addEventListener("wheel",e=>{e.preventDefault();const f=Math.exp(-e.deltaY*0.0015);const nk=Math.min(6,Math.max(0.15,view.k*f));
+cv.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")hover=null});
+cv.addEventListener("wheel",e=>{e.preventDefault();anim=null;const f=Math.exp(-e.deltaY*0.0015);const nk=Math.min(6,Math.max(0.15,view.k*f));
   const mx=e.clientX-W/2,my=e.clientY-H/2;view.x=mx-(mx-view.x)*nk/view.k;view.y=my-(my-view.y)*nk/view.k;view.k=nk;},{passive:false});
 
-// ---------- Panels ----------
-const info=document.getElementById("info"),addP=document.getElementById("add");
-function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function select(n){selected=n; if(!n){info.hidden=true;return}
-  addP.hidden=true;
-  const nb=[...adj.get(n.id)].sort();
-  const lvl=["Môn học","Chủ đề","Khái niệm","Chi tiết"][n.level];
-  info.innerHTML=`<h2>${esc(n.id)}</h2><div class="grp" style="color:${color(n.group)}">${esc(n.group)} · ${lvl}</div>
-  <div class="stat" style="margin-bottom:8px">${nb.length} liên kết</div><ul>${nb.map(x=>`<li data-id="${esc(x)}">${esc(x)}</li>`).join("")}</ul>
-  <div class="row"><button id="closeInfo">Đóng</button><button id="linkHere">+ Nối từ đây</button></div>`;
-  info.hidden=false;
-  info.querySelectorAll("li").forEach(li=>li.onclick=()=>{const m=byId.get(li.dataset.id);select(m);centerOn(m)});
-  document.getElementById("closeInfo").onclick=()=>select(null);
-  document.getElementById("linkHere").onclick=()=>{openAdd();document.getElementById("nLinks").value=n.id};
+// ---------- Local graph ----------
+function setLocal(n){
+  localRoot=n;
+  if(n){ localSet=new Set([n.id]); let frontier=[n.id];
+    for(let step=0;step<2;step++){const next=[];for(const id of frontier)for(const m of adj.get(id))if(!localSet.has(m)){localSet.add(m);next.push(m)}frontier=next;}
+  } else localSet=null;
+  document.getElementById("allBtn").hidden=!n; alpha=Math.max(alpha,0.3);
 }
-function fit(){let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;for(const n of N){if(hidden.has(n.group))continue;x0=Math.min(x0,n.x);y0=Math.min(y0,n.y);x1=Math.max(x1,n.x);y1=Math.max(y1,n.y)}
-  if(x0>x1) return;
-  const k=Math.min((W-40)/(x1-x0||1),(H-160)/(y1-y0||1),2);view={k,x:-(x0+x1)/2*k,y:-(y0+y1)/2*k};}
-function centerOn(n){view.x=-n.x*view.k;view.y=-n.y*view.k}
-document.getElementById("q").addEventListener("input",e=>{query=e.target.value.trim();
-  const m=query&&N.find(n=>n.id.toLowerCase().startsWith(query.toLowerCase())); if(m) centerOn(m);});
-document.getElementById("q").addEventListener("keydown",e=>{if(e.key==="Enter"&&query){const m=N.find(n=>n.id.toLowerCase().includes(query.toLowerCase()));if(m){select(m);centerOn(m)}}});
-document.getElementById("fitBtn").onclick=()=>{fit();select(null)};
-function openAdd(){info.hidden=true;addP.hidden=false;document.getElementById("addMsg").textContent="Thay đổi được lưu trong trình duyệt này.";document.getElementById("nName").focus()}
-document.getElementById("addBtn").onclick=openAdd;
-document.getElementById("cancelAdd").onclick=()=>addP.hidden=true;
-document.getElementById("saveAdd").onclick=()=>{
-  const name=document.getElementById("nName").value.trim(); const msg=document.getElementById("addMsg");
-  if(!name){msg.textContent="Nhập tên khái niệm trước khi lưu.";return}
-  const lookup=new Map(N.map(n=>[n.id.toLowerCase(),n.id]));
-  const raw=document.getElementById("nLinks").value.split(",").map(s=>s.trim()).filter(Boolean);
-  const ok=raw.map(s=>lookup.get(s.toLowerCase())).filter(Boolean), bad=raw.filter(s=>!lookup.has(s.toLowerCase()));
-  const existing=custom.find(c=>c.id.toLowerCase()===name.toLowerCase());
-  const id=lookup.get(name.toLowerCase())||name;
-  if(existing) existing.links=[...new Set(existing.links.concat(ok))]; else custom.push({id,links:ok});
-  try{localStorage.setItem(KEY,JSON.stringify(custom))}catch(e){}
-  rebuild(true); const n=byId.get(id); if(n&&n.x===undefined){} select(n); if(n) centerOn(n);
-  document.getElementById("nName").value="";document.getElementById("nLinks").value="";
-  if(bad.length){addP.hidden=false;info.hidden=true;msg.textContent="Đã lưu. Không tìm thấy: "+bad.join(", ")+" (kiểm tra chính tả).";}
+function open(n){ setLocal(n); select(n); flyToNode(n); }
+
+// ---------- Panel ----------
+const info=document.getElementById("info");
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function select(n){selected=n; if(!n){info.hidden=true;return}
+  const note=NOTES[n.id]||{}, has=["definition","example","question","answer"].some(k=>note[k]);
+  const st=status[n.id]||{};
+  const sec=(t,v)=>v?`<h3>${t}</h3><p>${esc(v)}</p>`:"";
+  const notesHtml=has?sec("Định nghĩa",note.definition)+sec("Ví dụ",note.example)+sec("Câu hỏi",note.question)
+      +(note.answer?`<div class="row"><button id="ansBtn">Hiện đáp án</button></div><p id="ans" hidden style="margin-top:8px">${esc(note.answer)}</p>`:"")
+    :`<p class="hint">Chưa có ghi chú</p>`;
+  const links=(edgesOf.get(n.id)||[]).map(l=>{const o=l.s===n?l.t:l.s;
+    return `<li>→ ${l.relation?`<span class="rel">[${esc(l.relation)}]</span> `:""}<a data-id="${esc(o.id)}">${esc(o.id)}</a>${l.note?": "+esc(l.note):""}</li>`}).join("");
+  const btn=(s,label)=>`<button class="st${st.status===s?" on":""}" data-s="${s}">${label}</button>`;
+  info.innerHTML=`<h2>${esc(n.id)}</h2>
+  <div class="grp"><span style="color:${color(n.group)}">${esc(n.group)}</span>${n.level?`<span class="badge">Level ${esc(n.level)}</span>`:""}</div>
+  ${notesHtml}
+  <h3>Trạng thái</h3>
+  <div class="row" style="margin-top:4px">${btn("mastered","🟢 Đã nắm")}${btn("learning","🟡 Đang học")}${btn("weak","🔴 Yếu")}</div>
+  ${st.lastReviewed?`<div class="hint">Ôn gần nhất: ${esc(st.lastReviewed)}</div>`:""}
+  <h3>Liên kết</h3>${links?`<ul>${links}</ul>`:`<p class="hint">Chưa có liên kết</p>`}
+  <div class="row"><button id="closeInfo">Đóng</button></div>`;
+  info.hidden=false;
+  const ab=document.getElementById("ansBtn"); if(ab) ab.onclick=()=>{const a=document.getElementById("ans");a.hidden=!a.hidden;ab.textContent=a.hidden?"Hiện đáp án":"Ẩn đáp án"};
+  info.querySelectorAll("a[data-id]").forEach(a=>a.onclick=()=>open(byId.get(a.dataset.id)));
+  info.querySelectorAll("button.st").forEach(b=>b.onclick=()=>setStatus(n,b.dataset.s));
+  document.getElementById("closeInfo").onclick=()=>select(null);
+}
+function setStatus(n,s){
+  const cur=status[n.id]&&status[n.id].status;
+  const v={status:cur===s?"":s,lastReviewed:today()};  // tapping the active button clears it
+  status[n.id]=v; localStatus[n.id]=v;
+  try{localStorage.setItem(STATUS_KEY,JSON.stringify(localStatus))}catch(e){}
+  select(n);
+}
+
+// ---------- Top bar ----------
+function toast(msg){const t=document.getElementById("toast");t.textContent=msg;t.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>t.hidden=true,1800)}
+document.getElementById("exportBtn").onclick=async()=>{
+  const json=JSON.stringify(status,null,2);
+  try{await navigator.clipboard.writeText(json);toast("Đã copy")}
+  catch(e){selected=null;info.innerHTML=`<h2>Xuất dữ liệu</h2><p class="hint">Không copy tự động được. Hãy copy đoạn dưới đây:</p><textarea readonly>${esc(json)}</textarea><div class="row"><button id="closeInfo">Đóng</button></div>`;
+    info.hidden=false;const ta=info.querySelector("textarea");ta.focus();ta.select();document.getElementById("closeInfo").onclick=()=>select(null);}
 };
-document.getElementById("resetBtn").onclick=()=>{custom=[];try{localStorage.removeItem(KEY)}catch(e){};rebuild(false);addP.hidden=true;};
+document.getElementById("fitBtn").onclick=()=>{select(null);flyTo(fitView())};
+document.getElementById("allBtn").onclick=()=>{setLocal(null);select(null);for(let i=0;i<60;i++)tick();flyTo(fitView())};
+const qEl=document.getElementById("q");
+qEl.addEventListener("input",e=>{query=e.target.value.trim();
+  const m=query&&N.find(n=>isVis(n)&&n.id.toLowerCase().startsWith(query.toLowerCase())); if(m) flyToNode(m);});
+qEl.addEventListener("keydown",e=>{if(e.key==="Enter"&&query){
+  const m=N.find(n=>n.id.toLowerCase().includes(query.toLowerCase())); if(m){hidden.delete(m.group);drawLegend();open(m);qEl.blur()}}});
 
 function drawLegend(){const el=document.getElementById("legend");
-  const groups=[...new Set(N.map(n=>n.group))];
-  el.innerHTML=groups.map(g=>`<span data-g="${esc(g)}" class="${hidden.has(g)?"off":""}"><i style="background:${color(g)}"></i>${esc(g)}</span>`).join("");
+  el.innerHTML=Object.keys(GROUPS).map(g=>`<span data-g="${esc(g)}" class="${hidden.has(g)?"off":""}"><i style="background:${color(g)}"></i>${esc(g)}</span>`).join("");
   el.querySelectorAll("span").forEach(s=>s.onclick=()=>{const g=s.dataset.g;hidden.has(g)?hidden.delete(g):hidden.add(g);alpha=Math.max(alpha,.4);drawLegend()});}
 
-rebuild(false);
-for(let i=0;i<400;i++) tick(); alpha=0.2;
-fit();
-(function loop(){tick();draw();requestAnimationFrame(loop)})();
+fetch("data.json",{cache:"no-store"})
+  .then(r=>{if(!r.ok) throw new Error("HTTP "+r.status);return r.json()})
+  .then(d=>{init(d);(function loop(now){tick();draw(now||0);requestAnimationFrame(loop)})()})
+  .catch(e=>{const d=document.createElement("div");d.className="err";
+    d.textContent="Không tải được data.json ("+e.message+"). Trang cần chạy trên GitHub Pages hoặc một web server, không mở trực tiếp từ file.";document.body.appendChild(d)});
 </script>
 </body>
 </html>
