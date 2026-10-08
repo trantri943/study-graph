@@ -45,6 +45,11 @@
       "parent": "English (ALI)"
     },
     {
+      "id": "Vocabulary Notebook #5",
+      "group": "Language",
+      "parent": "Writing/Reading/Vocabulary"
+    },
+    {
       "id": "Vocabulary Notebook #6",
       "group": "Language",
       "parent": "Writing/Reading/Vocabulary"
@@ -52,6 +57,39 @@
   ],
   "links": [],
   "notes": {
+    "Vocabulary Notebook #5": {
+      "type": "notebook",
+      "file": "vocab/vocab-notebook-5.md",
+      "words": [
+        "reputation",
+        "despair",
+        "mercy",
+        "fortune",
+        "possession",
+        "objection",
+        "bargain",
+        "thread",
+        "wander",
+        "boundary",
+        "bare",
+        "precious",
+        "wrap",
+        "pretend",
+        "grind",
+        "swell",
+        "arch",
+        "satisfaction",
+        "scatter",
+        "lend",
+        "dismiss",
+        "haste",
+        "delicate",
+        "bundle",
+        "grateful"
+      ],
+      "source": "Holes – Louis Sachar",
+      "created": "2026-10-08"
+    },
     "Vocabulary Notebook #6": {
       "type": "notebook",
       "file": "vocab/vocab-notebook-6.md",

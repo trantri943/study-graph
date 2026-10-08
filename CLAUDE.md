@@ -50,7 +50,7 @@ Khi tôi gửi tin nhắn bắt đầu bằng `#CAPNHAT`, mỗi dòng là một 
 - **Từ vựng không phải node.** Chúng chỉ nằm trong `notes[...].words` và trong file `.md`.
 - `words` lấy từ các tiêu đề dạng `### ① WORD (loại từ) — nghĩa`: chỉ lấy phần WORD, viết thường, giữ đúng thứ tự trong file. Số từ phải khớp với số tiêu đề.
 - Mỗi từ là một tiêu đề `### <số khoanh> WORD (...) — ...`, theo sau là các dòng `**Def:**`, `**Syn:**`, `**Ex:**`, `**WF:**`, `**Coll:**`, `**Q:**`. Trang web đọc thẻ từ theo đúng định dạng này.
-- **Không tạo notebook rỗng.** Notebook #1–#5 chờ tôi gửi nội dung.
+- **Không tạo notebook rỗng.** Notebook #1–#4 chờ tôi gửi nội dung.
 - Thư viện render Markdown được lưu sẵn trong repo: `vendor/marked-12.0.2.min.js`.
 
 | Lệnh | Cú pháp | Tác dụng |
