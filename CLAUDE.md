@@ -34,11 +34,11 @@ Khi tôi gửi tin nhắn bắt đầu bằng `#CAPNHAT`, mỗi dòng là một 
 | Lệnh | Cú pháp | Ánh xạ vào data.json |
 |---|---|---|
 | NHOM | `NHOM: Tên nhóm` | Thêm vào `groups`, kèm một màu tự chọn chưa trùng màu nhóm khác và hợp nền đen. Thêm node gốc `{id: Tên nhóm, group: Tên nhóm, parent: null}`. |
-| THEM | `THEM: Tên node > Node cha` | Thêm vào `nodes`, `group` lấy theo node cha. |
+| THEM | `THEM: Node cha > Tên node` | Thêm vào `nodes`, `group` lấy theo node cha. Node đã tồn tại thì bỏ qua, không tạo trùng. |
 | DOITEN | `DOITEN: Tên cũ > Tên mới` | Đổi `id`, và đổi tên ở mọi chỗ tham chiếu: `parent`, `links`, `notes`, `status`. Nếu node là gốc nhóm thì hỏi có đổi tên nhóm không. |
 | XOA | `XOA: Tên node` | Xóa node, cùng `links`/`notes`/`status` của nó. **Nếu node còn node con thì dừng lại hỏi tôi**, không tự xóa cả nhánh. |
 | LEVEL | `LEVEL: Tên node = 3` | Gán `level`. Để trống sau `=` thì xóa `level`. |
-| NOI | `NOI: Node A > Node B \| quan hệ \| giải thích` | Thêm vào `links`: `{source: A, target: B, relation, note}`. |
+| NOI | `NOI: Node A > Node B \| quan hệ \| giải thích` (dùng `>` hoặc `->` đều được) | Thêm vào `links`: `{source: A, target: B, relation, note}`. |
 | GHICHU | `GHICHU: Tên node` rồi các dòng `definition: …`, `example: …`, `question: …`, `answer: …` | Ghi vào `notes`. Chỉ ghi các trường tôi gửi. |
 | TRANGTHAI | `TRANGTHAI: Tên node = mastered\|learning\|weak` | Ghi vào `status`, với `lastReviewed` = ngày hôm đó. |
 

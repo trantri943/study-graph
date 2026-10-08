@@ -30,6 +30,26 @@
       "level": "3"
     },
     {
+      "id": "Present Perfect",
+      "group": "Language",
+      "parent": "Grammar"
+    },
+    {
+      "id": "Present Progressive",
+      "group": "Language",
+      "parent": "Grammar"
+    },
+    {
+      "id": "Simple Past",
+      "group": "Language",
+      "parent": "Grammar"
+    },
+    {
+      "id": "Past Progressive",
+      "group": "Language",
+      "parent": "Grammar"
+    },
+    {
       "id": "Listening and Speaking",
       "group": "Language",
       "parent": "English (ALI)"
@@ -65,19 +85,49 @@
       "parent": "Fasting, Nature & the Brain"
     },
     {
-      "id": "Slide Design Rules",
-      "group": "Language",
-      "parent": "Fasting, Nature & the Brain"
-    },
-    {
       "id": "References & Source Quality",
       "group": "Language",
       "parent": "Fasting, Nature & the Brain"
     },
     {
+      "id": "Slide Design",
+      "group": "Language",
+      "parent": "Presentation"
+    },
+    {
+      "id": "Delivery Techniques",
+      "group": "Language",
+      "parent": "Presentation"
+    },
+    {
+      "id": "Note-taking",
+      "group": "Language",
+      "parent": "Listening and Speaking"
+    },
+    {
+      "id": "Shorthand",
+      "group": "Language",
+      "parent": "Listening and Speaking"
+    },
+    {
+      "id": "Discussions",
+      "group": "Language",
+      "parent": "Listening and Speaking"
+    },
+    {
+      "id": "Persuasive Speaking",
+      "group": "Language",
+      "parent": "Listening and Speaking"
+    },
+    {
       "id": "Writing/Reading/Vocabulary",
       "group": "Language",
       "parent": "English (ALI)"
+    },
+    {
+      "id": "Holes (Louis Sachar)",
+      "group": "Language",
+      "parent": "Writing/Reading/Vocabulary"
     },
     {
       "id": "Business",
@@ -113,6 +163,66 @@
       "target": "Being in Nature",
       "relation": "limits",
       "note": "Small, short-term, some only correlations — why nature is 4/5, not 5."
+    },
+    {
+      "source": "Present Perfect",
+      "target": "Simple Past",
+      "relation": "khác với",
+      "note": "Simple Past có thời điểm cụ thể; Present Perfect thì không"
+    },
+    {
+      "source": "Present Progressive",
+      "target": "Past Progressive",
+      "relation": "khác với",
+      "note": "đang xảy ra bây giờ vs đang xảy ra tại một thời điểm trong quá khứ"
+    },
+    {
+      "source": "Shorthand",
+      "target": "Note-taking",
+      "relation": "là một phần của",
+      "note": "viết tắt để ghi kịp khi nghe"
+    },
+    {
+      "source": "Note-taking",
+      "target": "Writing/Reading/Vocabulary",
+      "relation": "hỗ trợ",
+      "note": "ghi chú khi nghe giúp gom từ mới"
+    },
+    {
+      "source": "Persuasive Speaking",
+      "target": "Presentation",
+      "relation": "hỗ trợ",
+      "note": "thuyết phục người nghe bằng lập luận và bằng chứng"
+    },
+    {
+      "source": "Fasting, Nature & the Brain",
+      "target": "Slide Design",
+      "relation": "áp dụng",
+      "note": "quy tắc của David JP Phillips"
+    },
+    {
+      "source": "Fasting, Nature & the Brain",
+      "target": "Delivery Techniques",
+      "relation": "áp dụng",
+      "note": "hook, open loop, rule of three, callback"
+    },
+    {
+      "source": "Business",
+      "target": "Presentation",
+      "relation": "dùng",
+      "note": "kỹ năng thuyết trình trong công việc"
+    },
+    {
+      "source": "Vocabulary Notebook #5",
+      "target": "Holes (Louis Sachar)",
+      "relation": "trích từ",
+      "note": "từ vựng học qua tiểu thuyết"
+    },
+    {
+      "source": "Vocabulary Notebook #6",
+      "target": "Holes (Louis Sachar)",
+      "relation": "trích từ",
+      "note": "từ vựng học qua tiểu thuyết"
     }
   ],
   "notes": {
@@ -218,15 +328,15 @@
       "question": "Do both together?",
       "answer": "Yes, e.g., morning park walk before breakfast; start slowly."
     },
-    "Slide Design Rules": {
-      "definition": "One message per slide; no full sentences to read (redundancy effect); most important = biggest; guide focus with contrast; max ~6 objects.",
-      "example": "Subitizing (Kaufman et al., 1949); working memory ≈ 4±1 chunks (Cowan, 2001)."
-    },
     "References & Source Quality": {
       "definition": "Peer-reviewed journal > book > student project.",
       "example": "On CSULB OneSearch, filter \"Peer-reviewed Journals\"; \"Source: CSU_SCHOLARWORKS\" usually = student work.",
       "question": "Sources?",
       "answer": "Peer-reviewed journals + CSULB library; listed on last slides."
+    },
+    "Slide Design": {
+      "definition": "One message per slide; no full sentences to read (redundancy effect); most important = biggest; guide focus with contrast; max ~6 objects.",
+      "example": "Subitizing (Kaufman et al., 1949); working memory ≈ 4±1 chunks (Cowan, 2001)."
     }
   },
   "status": {}
