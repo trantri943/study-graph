@@ -33,7 +33,7 @@ Khi tôi gửi tin nhắn bắt đầu bằng `#CAPNHAT`, mỗi dòng là một 
 
 | Lệnh | Cú pháp | Ánh xạ vào data.json |
 |---|---|---|
-| NHOM | `NHOM: Tên nhóm` | Thêm vào `groups`, kèm một màu tự chọn chưa trùng màu nhóm khác và hợp nền đen. Thêm node gốc `{id: Tên nhóm, group: Tên nhóm, parent: null}`. |
+| NHOM | `NHOM: Tên nhóm` | Thêm vào `groups`, màu lấy theo bảng màu dự phòng bên dưới (màu đầu tiên chưa dùng). Thêm node gốc `{id: Tên nhóm, group: Tên nhóm, parent: null}`. |
 | THEM | `THEM: Node cha > Tên node` | Thêm vào `nodes`, `group` lấy theo node cha. Node đã tồn tại thì bỏ qua, không tạo trùng. |
 | DOITEN | `DOITEN: Tên cũ > Tên mới` | Đổi `id`, và đổi tên ở mọi chỗ tham chiếu: `parent`, `links`, `notes`, `status`. Nếu node là gốc nhóm thì hỏi có đổi tên nhóm không. |
 | XOA | `XOA: Tên node` | Xóa node, cùng `links`/`notes`/`status` của nó. **Nếu node còn node con thì dừng lại hỏi tôi**, không tự xóa cả nhánh. |
@@ -41,6 +41,8 @@ Khi tôi gửi tin nhắn bắt đầu bằng `#CAPNHAT`, mỗi dòng là một 
 | NOI | `NOI: Node A > Node B \| quan hệ \| giải thích` (dùng `>` hoặc `->` đều được) | Thêm vào `links`: `{source: A, target: B, relation, note}`. |
 | GHICHU | `GHICHU: Tên node` rồi các dòng `definition: …`, `example: …`, `question: …`, `answer: …` | Ghi vào `notes`. Chỉ ghi các trường tôi gửi. |
 | TRANGTHAI | `TRANGTHAI: Tên node = mastered\|learning\|weak` | Ghi vào `status`, với `lastReviewed` = ngày hôm đó. |
+
+**Màu nhóm.** Đang dùng: Electrical & Electronic Eng. `#4F8CFF`, Language `#2DD4BF`. Nhóm mới lấy lần lượt theo thứ tự: `#F472B6` → `#FB923C` → `#818CF8` → `#38BDF8`. **Không dùng xanh lá, vàng hay đỏ làm màu nhóm**, vì ba màu này dành cho vòng trạng thái (mastered `#4ADE80`, learning `#FACC15`, weak `#F87171`).
 
 - Dòng nào không rõ (sai cú pháp, node không tồn tại, thiếu node cha…) thì hỏi lại, không đoán.
 - Vẫn áp dụng quy tắc 2: tóm tắt các thay đổi trước, chờ tôi xác nhận rồi mới sửa và push.

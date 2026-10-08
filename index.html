@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lewis · Study Graph</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400&display=swap">
 <style>
 /* Layout: full-screen canvas graph (Obsidian-style), floating search + panel. Single dark theme by choice. */
 :root{
-  --bg:#000; --panel:rgba(22,22,30,.92); --line:#2a2a36; --fg:#e7e6ee; --muted:#8d8b9c;
-  --accent:#8b7cf6; --mastered:#3ddc84; --learning:#f5c542; --weak:#ff5c5c;
+  --bg:#000; --panel:rgba(22,22,30,.92); --line:#2a2a36; --fg:#e7e6ee; --muted:#9b99aa;
+  --accent:#8b7cf6; --mastered:#4ADE80; --learning:#FACC15; --weak:#F87171;
   --sans:"IBM Plex Sans",system-ui,-apple-system,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
   color-scheme:dark;
 }
@@ -24,10 +24,19 @@ input{flex:1;min-width:120px;max-width:320px}
 button{cursor:pointer}
 button:hover,button:focus-visible{border-color:var(--accent);outline:none}
 input:focus-visible{outline:none;border-color:var(--accent)}
-.legend{position:fixed;left:16px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;flex-wrap:wrap;gap:6px 12px;max-width:calc(100% - 32px);font-size:12px;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:6px;cursor:pointer}
-.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
-.legend span.off{opacity:.35}
+.legend{position:fixed;left:16px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;align-items:flex-end;gap:8px;max-width:calc(100% - 32px);font-size:12px;color:var(--muted)}
+.legend #legToggle{flex:none;font-size:11px;line-height:1;padding:5px 7px;border-radius:6px;color:var(--muted)}
+.lg-body{display:flex;flex-direction:column;gap:6px;min-width:0}
+.legend.collapsed .lg-body{display:none}
+.lg-row{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center}
+.lg-row span{display:inline-flex;align-items:center;gap:6px}
+#legGroups span{cursor:pointer}
+#legGroups span.off{opacity:.35}
+.legend i{display:inline-block;flex:none;border-radius:50%}
+.lg-line{display:inline-block;width:18px;border-top:1.5px solid #8B8FA3}
+.lg-line.dash{border-top:1.5px dashed #C4B5FD}
+.lg-ring{width:8px;height:8px;border-radius:50%;border:2px solid;box-sizing:border-box;display:inline-block}
+@media (max-width:520px){.legend{font-size:11px}.lg-row{gap:3px 10px}}
 .panel{position:fixed;right:16px;top:calc(64px + env(safe-area-inset-top,0px));width:min(320px,calc(100% - 32px));box-sizing:border-box;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;backdrop-filter:blur(8px);max-height:calc(100% - 140px);overflow:auto}
 .panel h2{margin:0 0 2px;font-size:17px;font-weight:600;text-wrap:balance}
 .panel .grp{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
@@ -48,7 +57,7 @@ input:focus-visible{outline:none;border-color:var(--accent)}
 .stat{font-family:var(--mono);font-size:11px;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(56px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:8px 14px;font-size:13px}
 .err{position:fixed;inset:0;display:grid;place-items:center;padding:16px;text-align:center;color:var(--muted);font-size:14px;line-height:1.5}
-@media (max-width:520px){.panel{top:auto;left:16px;width:auto;bottom:calc(40px + env(safe-area-inset-bottom,0px));max-height:48%}}
+@media (max-width:520px){.panel{top:auto;left:16px;width:auto;bottom:calc(var(--legH,40px) + 20px + env(safe-area-inset-bottom,0px));max-height:48%}}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .chip{font-size:13px;padding:3px 10px;border-radius:999px}
 .chip.on{border-color:var(--accent);background:rgba(139,124,246,.18)}
@@ -88,7 +97,20 @@ textarea{width:100%;box-sizing:border-box;height:140px;font-family:var(--mono);f
   <button id="exportBtn">Xuất dữ liệu</button>
   <span class="stat" id="stat"></span>
 </div>
-<div class="legend" id="legend"></div>
+<div class="legend" id="legend">
+  <button id="legToggle" aria-label="Thu gọn chú thích" aria-expanded="true">▾</button>
+  <div class="lg-body">
+    <div class="lg-row" id="legGroups"></div>
+    <div class="lg-row">
+      <span><i style="width:11px;height:11px;background:#E7E6EE"></i>Nhóm</span>
+      <span><i style="width:8px;height:8px;background:#E7E6EE"></i>Môn</span>
+      <span><i style="width:4px;height:4px;background:#C9CCD6"></i>Mục</span>
+      <span><b class="lg-line"></b>cha–con</span>
+      <span><b class="lg-line dash"></b>liên kết</span>
+      <span><b class="lg-ring" style="border-color:#4ADE80"></b><b class="lg-ring" style="border-color:#FACC15"></b><b class="lg-ring" style="border-color:#F87171"></b>trạng thái</span>
+    </div>
+  </div>
+</div>
 <div class="panel" id="info" hidden></div>
 <div class="toast" id="toast" hidden></div>
 <div class="reader" id="reader" hidden><div class="bar"><button id="closeReader">Đóng</button></div><div class="md" id="readerBody"></div></div>
@@ -99,13 +121,19 @@ textarea{width:100%;box-sizing:border-box;height:140px;font-family:var(--mono);f
 let GROUPS={}, NOTES={};
 const color=g=>(GROUPS[g]&&GROUPS[g].color)||"#bbb";
 const STATUS_KEY="study-graph-status-v1";
-const STATUS_COLOR={mastered:"#3ddc84",learning:"#f5c542",weak:"#ff5c5c"};
+const STATUS_COLOR={mastered:"#4ADE80",learning:"#FACC15",weak:"#F87171"};
+// Visual hierarchy by depth (0 = group root): radius / label size in screen px at zoom <= 1
+const BASE_R=[18,12,7], BASE_R_DEEP=4, LABEL=[[15,700],[12,600],[11,400]], LABEL_DEEP=[10,400];
+const TREE_EDGE="139,143,163", CROSS_EDGE="196,181,253";
+function mixWhite(hex,t){const v=parseInt(hex.slice(1),16),c=[v>>16,(v>>8)&255,v&255].map(x=>Math.round(x+(255-x)*t));return `rgb(${c})`}
+function fillOf(n){const c=color(n.group);return n.depth===0?c:n.depth===1?mixWhite(c,.2):n.depth===2?mixWhite(c,.55):"#C9CCD6"}
 let status={};          // merged: data.json status + localStorage (newer lastReviewed wins)
 let localStatus={};     // what this browser changed
 let N=[],L=[],byId=new Map(),adj=new Map(),edgesOf=new Map();
 const hidden=new Set();
 let localRoot=null, localSet=null;  // local graph: node + neighbours within 2 steps
 
+function hash(s){let h=2166136261;for(const c of s){h^=c.codePointAt(0);h=Math.imul(h,16777619)}return h>>>0}
 function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 
 function init(data){
@@ -115,11 +143,16 @@ function init(data){
   for(const [k,v] of Object.entries(localStatus)){
     const cur=status[k]; if(!cur||(v.lastReviewed||"")>=(cur.lastReviewed||"")) status[k]=v; }
 
-  N=(data.nodes||[]).map(n=>({id:n.id,group:n.group,parent:n.parent||null,level:n.level||"",
-    x:(Math.random()-.5)*400,y:(Math.random()-.5)*400,vx:0,vy:0}));
+  N=(data.nodes||[]).map(n=>({id:n.id,group:n.group,parent:n.parent||null,level:n.level||"",x:0,y:0,vx:0,vy:0}));
   byId=new Map(N.map(n=>[n.id,n]));
   for(const n of N){ // depth from parent chain (0 = group root)
     let d=0,p=n.parent,guard=0; while(p&&byId.has(p)&&guard++<50){d++;p=byId.get(p).parent} n.depth=d; }
+  // deterministic start (same layout every load): roots on a circle, children near their parent
+  const roots=N.filter(n=>n.depth===0);
+  roots.forEach((n,i)=>{const a=2*Math.PI*i/roots.length+0.6;n.x=Math.cos(a)*160;n.y=Math.sin(a)*160;});
+  for(const n of [...N].sort((a,b)=>a.depth-b.depth)) if(n.depth>0){
+    const p=byId.get(n.parent)||{x:0,y:0}, h=hash(n.id), a=(h%360)*Math.PI/180;
+    n.x=p.x+Math.cos(a)*40; n.y=p.y+Math.sin(a)*40; }
   adj=new Map(N.map(n=>[n.id,new Set()])); edgesOf=new Map(N.map(n=>[n.id,[]])); L=[];
   const addEdge=(a,b,relation,note,tree)=>{
     if(!byId.has(a)||!byId.has(b)||a===b||adj.get(a).has(b)) return;
@@ -127,7 +160,7 @@ function init(data){
     L.push(l); adj.get(a).add(b); adj.get(b).add(a); edgesOf.get(a).push(l); edgesOf.get(b).push(l); };
   for(const n of N) if(n.parent) addEdge(n.parent,n.id,"","",true);
   for(const l of data.links||[]) addEdge(l.source,l.target,l.relation,l.note,false);
-  for(const n of N){ n.deg=adj.get(n.id).size; n.r=[7,5,4][n.depth]||3; n.r+=Math.sqrt(n.deg)*0.6; }
+  for(const n of N){ n.deg=adj.get(n.id).size; n.r=BASE_R[n.depth]||BASE_R_DEEP; n.nb=(NOTES[n.id]||{}).type==="notebook"; }
   document.getElementById("stat").textContent=N.length+" nodes · "+L.length+" links";
   drawLegend();
   alpha=1; for(let i=0;i<500;i++) tick(); alpha=0.05;
@@ -144,12 +177,12 @@ function tick(){
     for(let j=i+1;j<vis.length;j++){const b=vis[j];
       let dx=b.x-a.x,dy=b.y-a.y,d2=dx*dx+dy*dy+0.01;
       if(d2>250000) continue;
-      const f=-900*alpha/d2; dx*=f;dy*=f; a.vx+=dx;a.vy+=dy;b.vx-=dx;b.vy-=dy;}}
+      const f=-1200*alpha/d2; dx*=f;dy*=f; a.vx+=dx;a.vy+=dy;b.vx-=dx;b.vy-=dy;}}
   for(const l of L){ if(!isVis(l.s)||!isVis(l.t)) continue;
     const dx=l.t.x-l.s.x,dy=l.t.y-l.s.y,d=Math.sqrt(dx*dx+dy*dy)||1;
-    const rest=l.tree?(Math.min(l.s.depth,l.t.depth)===0?90:60):80;
+    const dm=Math.min(l.s.depth,l.t.depth), rest=l.tree?(dm===0?100:dm===1?65:45):70;
     const k=(d-rest)/d*0.06*alpha; l.s.vx+=dx*k;l.s.vy+=dy*k;l.t.vx-=dx*k;l.t.vy-=dy*k;}
-  for(const n of vis){ n.vx-=n.x*0.008*alpha; n.vy-=n.y*0.008*alpha;
+  for(const n of vis){ const g=(n.depth===0?0.018:0.008)*alpha; n.vx-=n.x*g; n.vy-=n.y*g;  // roots pulled harder so lone groups stay close
     if(n===drag){n.vx=n.vy=0;continue}
     n.x+=n.vx; n.y+=n.vy; n.vx*=0.6; n.vy*=0.6; }
   alpha*=0.985;
@@ -165,16 +198,29 @@ function flyTo(target,ms=600){anim={from:{...view},to:target,t0:performance.now(
 function stepAnim(now){ if(!anim) return;
   const t=Math.min(1,(now-anim.t0)/anim.ms),e=ease(t),a=anim.from,b=anim.to;
   view={x:a.x+(b.x-a.x)*e,y:a.y+(b.y-a.y)*e,k:a.k+(b.k-a.k)*e}; if(t>=1) anim=null; }
-const fontPx=n=>[15,13,11.5][n.depth]||10.5;
+const label=n=>LABEL[n.depth]||LABEL_DEEP;
+const rOf=n=>n.r*Math.max(.55,Math.min(1,view.k))/view.k;  // screen-px size: never grows past base on zoom-in, shrinks to 55% on zoom-out
 function fitView(){
   const vis=N.filter(isVis); if(!vis.length) return {...view};
   let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
-  for(const n of vis){x0=Math.min(x0,n.x-n.r);x1=Math.max(x1,n.x+n.r);y0=Math.min(y0,n.y-n.r);y1=Math.max(y1,n.y+n.r)}
-  // margins in screen px: room for labels, top bar, legend
-  const padX=Math.min(110,W*0.18),padTop=80,padBot=70;
-  const k=Math.max(0.15,Math.min((W-2*padX)/Math.max(x1-x0,1),(H-padTop-padBot)/Math.max(y1-y0,1),2.5));
-  const cx=(x0+x1)/2,cy=(y0+y1)/2;
-  return {k,x:-cx*k,y:-cy*k+(padTop-padBot)/2};
+  for(const n of vis){x0=Math.min(x0,n.x);x1=Math.max(x1,n.x);y0=Math.min(y0,n.y);y1=Math.max(y1,n.y)}
+  // free screen area: below top bar, above legend, beside/above the open panel
+  const narrow=W<=520, open=!info.hidden;
+  const top=76, bottom=H-legEl.offsetHeight-28-(open&&narrow?info.offsetHeight+12:0);
+  const left=16, right=W-16-(open&&!narrow?info.offsetWidth+16:0);
+  const cx=(x0+x1)/2, cy=(y0+y1)/2, hw=(right-left)/2, hh=Math.max(bottom-top,60)/2;
+  // largest zoom where every node plus its (always-drawn) label stays inside the area
+  let k=2.5;
+  for(const n of vis){
+    const [px,wt]=label(n), lab=n.depth<=1||localSet; ctx.font=`${wt} ${px}px IBM Plex Sans, system-ui, sans-serif`;
+    const half=Math.max(n.r,lab?ctx.measureText(n.id).width/2:0), below=n.r+(lab?px+8:0);
+    const dx=Math.abs(n.x-cx), dyU=cy-n.y, dyD=n.y-cy;
+    if(dx>0) k=Math.min(k,(hw-half)/dx);
+    if(dyU>0) k=Math.min(k,(hh-n.r)/dyU);
+    if(dyD>0) k=Math.min(k,(hh-below)/dyD);
+  }
+  k=Math.max(0.15,k);
+  return {k,x:(left+right)/2-W/2-cx*k,y:(top+bottom)/2-H/2-cy*k};
 }
 function flyToNode(n){const k=Math.max(view.k,1.2);
   // keep the node clear of the panel: right-side panel on desktop, bottom sheet on phones
@@ -183,52 +229,54 @@ function flyToNode(n){const k=Math.max(view.k,1.2);
 
 // ---------- Rendering ----------
 let hover=null,selected=null,query="";
-function focusSet(){ const f=hover; if(!f) return null;  // only hover dims unrelated nodes
+function focusSet(){ const f=hover||selected; if(!f) return null;  // hover/selection dims unrelated nodes
   const s=new Set(adj.get(f.id)); s.add(f.id); return s; }
+function nodePath(n,r){ctx.beginPath();
+  if(n.nb){const q=r*0.9,c=r*0.35;ctx.moveTo(n.x-q+c,n.y-q);ctx.arcTo(n.x+q,n.y-q,n.x+q,n.y+q,c);ctx.arcTo(n.x+q,n.y+q,n.x-q,n.y+q,c);
+    ctx.arcTo(n.x-q,n.y+q,n.x-q,n.y-q,c);ctx.arcTo(n.x-q,n.y-q,n.x+q,n.y-q,c);ctx.closePath();}  // notebook: rounded square
+  else ctx.arc(n.x,n.y,r,0,7);}
 function draw(now){
   stepAnim(now);
   ctx.setTransform(dpr,0,0,dpr,0,0);
   ctx.fillStyle="#000";ctx.fillRect(0,0,W,H);
   ctx.setTransform(dpr*view.k,0,0,dpr*view.k,dpr*(W/2+view.x),dpr*(H/2+view.y));
-  const f=hover||selected, fs=focusSet(), q=query.toLowerCase();
-  const visCount=N.filter(isVis).length;
-  ctx.lineWidth=1/view.k;
+  const k=view.k, f=hover||selected, fs=focusSet(), q=query.toLowerCase();
   for(const l of L){ if(!isVis(l.s)||!isVis(l.t)) continue;
-    const on=f&&(l.s===f||l.t===f);
-    ctx.strokeStyle=on?"rgba(139,124,246,.9)":fs?"rgba(120,120,135,.12)":"rgba(150,150,160,.35)";
+    const on=f&&(l.s===f||l.t===f), dim=fs&&!on;
+    const a=l.tree?(Math.min(l.s.depth,l.t.depth)<=1?.5:.25):.75;
+    ctx.strokeStyle=`rgba(${l.tree?TREE_EDGE:CROSS_EDGE},${on?Math.min(1,a+.4):dim?a*.25:a})`;
+    ctx.lineWidth=(on?1.5:1)/k; ctx.setLineDash(l.tree?[]:[4/k,4/k]);
     ctx.beginPath();ctx.moveTo(l.s.x,l.s.y);ctx.lineTo(l.t.x,l.t.y);ctx.stroke();}
+  ctx.setLineDash([]);
   for(const n of N){ if(!isVis(n)) continue;
     const match=q&&nodeMatches(n,q);
     const dim=(fs&&!fs.has(n.id))||(q&&!match);
+    const r=rOf(n)+(match?2/k:0);
     ctx.globalAlpha=dim?0.25:1;
+    if(!dim&&n.depth<2){ctx.shadowColor=color(n.group);ctx.shadowBlur=(n.depth===0?22:8)*Math.min(k,1);}
+    ctx.fillStyle=fillOf(n); nodePath(n,r); ctx.fill(); ctx.shadowBlur=0;
     const st=status[n.id]&&STATUS_COLOR[status[n.id].status];
-    if(st){ // review-status halo; dot keeps its group colour
-      ctx.shadowColor=st;ctx.shadowBlur=18;ctx.fillStyle=st;ctx.globalAlpha*=0.35;
-      ctx.beginPath();ctx.arc(n.x,n.y,n.r+5/view.k+2,0,7);ctx.fill();
-      ctx.globalAlpha=dim?0.25:1;ctx.shadowBlur=0;
-      ctx.strokeStyle=st;ctx.lineWidth=1.5/view.k;ctx.beginPath();ctx.arc(n.x,n.y,n.r+2.5/view.k,0,7);ctx.stroke();ctx.lineWidth=1/view.k;
-    } else if(!dim&&n.depth<2){ctx.shadowColor=color(n.group);ctx.shadowBlur=n.depth===0?16:8;}
-    ctx.fillStyle=color(n.group);
-    ctx.beginPath();ctx.arc(n.x,n.y,Math.max(match?n.r+2:n.r,1.8/view.k),0,7);ctx.fill();ctx.shadowBlur=0;
-    const showLabel=visCount<=60||(fs&&fs.has(n.id))||match||n.depth===0||(view.k>1.1&&n.depth===1)||view.k>1.9;
-    if(showLabel){ctx.fillStyle=n.depth===0?"#fff":"#c9c8d6";
-      const px=fontPx(n);
-      ctx.font=`${n.depth===0?600:400} ${px/view.k}px IBM Plex Sans, system-ui, sans-serif`;
-      ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillText(n.id,n.x,n.y+n.r+(px+3)/view.k);}
+    if(st){ctx.strokeStyle=st;ctx.lineWidth=2/k;nodePath(n,r+3/k);ctx.stroke();}  // review status ring; fill unchanged
+    const [px,wt]=label(n);
+    const near=(fs&&fs.has(n.id))||(selected&&adj.get(selected.id).has(n.id))||n===selected;
+    const showLabel=n.depth<=1||localSet||near||match||(n.depth===2&&k>=1.2)||k>=2;
+    if(showLabel){ctx.fillStyle=n.depth===0?"#FFFFFF":n.depth===1?"#ECEDF2":n.depth===2?"#D9DBE3":"#C9CCD6";
+      ctx.font=`${wt} ${px/k}px IBM Plex Sans, system-ui, sans-serif`;
+      ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillText(n.id,n.x,n.y+r+(px+4)/k);}
     ctx.globalAlpha=1;}
   if(f) for(const l of edgesOf.get(f.id)||[]){ // relation labels at edge midpoints
     if(!l.relation||!isVis(l.s)||!isVis(l.t)) continue;
-    const mx=(l.s.x+l.t.x)/2,my=(l.s.y+l.t.y)/2,px=11/view.k;
+    const mx=(l.s.x+l.t.x)/2,my=(l.s.y+l.t.y)/2,px=11/k;
     ctx.font=`500 ${px}px IBM Plex Mono, ui-monospace, monospace`;
-    const w=ctx.measureText(l.relation).width+8/view.k;
+    const w=ctx.measureText(l.relation).width+8/k;
     ctx.fillStyle="rgba(0,0,0,.85)";ctx.fillRect(mx-w/2,my-px*0.85,w,px*1.7);
-    ctx.fillStyle="#b9b0ff";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(l.relation,mx,my);ctx.textBaseline="alphabetic";}
+    ctx.fillStyle="#C4B5FD";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(l.relation,mx,my);ctx.textBaseline="alphabetic";}
 }
 
 // ---------- Interaction: pan, zoom, drag, tap ----------
 const toWorld=(px,py)=>({x:(px-W/2-view.x)/view.k,y:(py-H/2-view.y)/view.k});
 function pick(px,py){const p=toWorld(px,py);let best=null,bd=1e9;
-  for(const n of N){if(!isVis(n))continue;const d=Math.hypot(n.x-p.x,n.y-p.y);if(d<Math.max(n.r+4,14/view.k)&&d<bd){bd=d;best=n}}return best}
+  for(const n of N){if(!isVis(n))continue;const d=Math.hypot(n.x-p.x,n.y-p.y);if(d<Math.max(rOf(n)+4/view.k,14/view.k)&&d<bd){bd=d;best=n}}return best}
 let drag=null,panning=null,pointers=new Map(),pinch=null,moved=false;
 cv.addEventListener("pointerdown",e=>{cv.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;anim=null;
   if(pointers.size===2){const [a,b]=[...pointers.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),k:view.k};drag=null;panning=null;return}
@@ -255,7 +303,7 @@ function setLocal(n){
   } else localSet=null;
   document.getElementById("allBtn").hidden=!n; alpha=Math.max(alpha,0.3);
 }
-function open(n,word){ setLocal(n); select(n,word); flyToNode(n); }
+function open(n,word){ setLocal(n); select(n,word); for(let i=0;i<80;i++) tick(); flyTo(fitView()); }  // frame the local graph
 
 // ---------- Panel ----------
 const info=document.getElementById("info");
@@ -362,8 +410,15 @@ qEl.addEventListener("keydown",e=>{if(e.key==="Enter"&&query){
   const q=query.toLowerCase(), m=N.find(n=>n.id.toLowerCase().includes(q)), fw=!m&&findWord(q);
   const target=m||(fw&&fw[0]); if(target){hidden.delete(target.group);drawLegend();open(target,fw?fw[1]:undefined);qEl.blur()}}});
 
-function drawLegend(){const el=document.getElementById("legend");
-  el.innerHTML=Object.keys(GROUPS).map(g=>`<span data-g="${esc(g)}" class="${hidden.has(g)?"off":""}"><i style="background:${color(g)}"></i>${esc(g)}</span>`).join("");
+const LEG_KEY="study-graph-legend-collapsed";
+const legEl=document.getElementById("legend"),legBtn=document.getElementById("legToggle");
+function setLegend(c){legEl.classList.toggle("collapsed",c);legBtn.textContent=c?"▸ Chú thích":"▾";legBtn.setAttribute("aria-expanded",String(!c));
+  try{localStorage.setItem(LEG_KEY,c?"1":"")}catch(e){}}
+legBtn.onclick=()=>setLegend(!legEl.classList.contains("collapsed"));
+new ResizeObserver(()=>document.documentElement.style.setProperty("--legH",legEl.offsetHeight+"px")).observe(legEl);
+try{if(localStorage.getItem(LEG_KEY))setLegend(true)}catch(e){}
+function drawLegend(){const el=document.getElementById("legGroups");
+  el.innerHTML=Object.keys(GROUPS).map(g=>`<span data-g="${esc(g)}" class="${hidden.has(g)?"off":""}"><i style="width:9px;height:9px;background:${color(g)}"></i>${esc(g)}</span>`).join("");
   el.querySelectorAll("span").forEach(s=>s.onclick=()=>{const g=s.dataset.g;hidden.has(g)?hidden.delete(g):hidden.add(g);alpha=Math.max(alpha,.4);drawLegend()});}
 
 fetch("data.json",{cache:"no-store"})
