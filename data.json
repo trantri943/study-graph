@@ -1,18 +1,88 @@
 {
   "groups": {
-    "Electrical & Electronic Eng.": {"color": "#3a5df0"},
-    "Language": {"color": "#7ff0e0"}
+    "Electrical & Electronic Eng.": {
+      "color": "#3a5df0"
+    },
+    "Language": {
+      "color": "#7ff0e0"
+    }
   },
   "nodes": [
-    {"id": "Electrical & Electronic Eng.", "group": "Electrical & Electronic Eng.", "parent": null},
-    {"id": "Language", "group": "Language", "parent": null},
-    {"id": "English (ALI)", "group": "Language", "parent": "Language"},
-    {"id": "Grammar", "group": "Language", "parent": "English (ALI)", "level": "3"},
-    {"id": "Listening and Speaking", "group": "Language", "parent": "English (ALI)"},
-    {"id": "Writing/Reading/Vocabulary", "group": "Language", "parent": "English (ALI)"},
-    {"id": "Business", "group": "Language", "parent": "English (ALI)"}
+    {
+      "id": "Electrical & Electronic Eng.",
+      "group": "Electrical & Electronic Eng.",
+      "parent": null
+    },
+    {
+      "id": "Language",
+      "group": "Language",
+      "parent": null
+    },
+    {
+      "id": "English (ALI)",
+      "group": "Language",
+      "parent": "Language"
+    },
+    {
+      "id": "Grammar",
+      "group": "Language",
+      "parent": "English (ALI)",
+      "level": "3"
+    },
+    {
+      "id": "Listening and Speaking",
+      "group": "Language",
+      "parent": "English (ALI)"
+    },
+    {
+      "id": "Writing/Reading/Vocabulary",
+      "group": "Language",
+      "parent": "English (ALI)"
+    },
+    {
+      "id": "Business",
+      "group": "Language",
+      "parent": "English (ALI)"
+    },
+    {
+      "id": "Vocabulary Notebook #6",
+      "group": "Language",
+      "parent": "Writing/Reading/Vocabulary"
+    }
   ],
   "links": [],
-  "notes": {},
+  "notes": {
+    "Vocabulary Notebook #6": {
+      "type": "notebook",
+      "file": "vocab/vocab-notebook-6.md",
+      "words": [
+        "reward",
+        "caution",
+        "idle",
+        "urgent",
+        "empire",
+        "disagree",
+        "forbid",
+        "disapprove",
+        "regret",
+        "bound",
+        "companion",
+        "decisive",
+        "pronounce",
+        "prevention",
+        "blade",
+        "lodge",
+        "multiply",
+        "imitation",
+        "immense",
+        "vessel",
+        "mineral",
+        "steam",
+        "organ"
+      ],
+      "source": "Holes – Louis Sachar",
+      "created": "2026-10-08"
+    }
+  },
   "status": {}
 }

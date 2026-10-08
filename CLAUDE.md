@@ -16,6 +16,7 @@ Trang Study Graph (GitHub Pages). Giao diện nằm trong `index.html`, **dữ l
 
 - `nodes`: node gốc của nhóm có `parent: null`. Node con trỏ tới node cha qua `parent` và thuộc cùng `group` với cha. `level` không bắt buộc, hiện thành nhãn "Level n" trong panel.
 - `links`: đường nối ngang có nhãn, giữa hai node bất kỳ. Cả hai node phải có trong `nodes`.
+- `notes` của node sổ từ vựng có dạng khác: `{"type": "notebook", "file": "vocab/vocab-notebook-N.md", "words": [...], "source": "...", "created": "YYYY-MM-DD"}`. Xem mục "Sổ từ vựng" bên dưới.
 - `notes`, `status`: khóa là `id` của node. Trường nào chưa có dữ liệu thì bỏ trống hoặc không ghi.
 - `id` phải duy nhất. Khi đổi tên một node, phải đổi ở mọi chỗ: `parent`, `links`, `notes`, `status`.
 
@@ -42,6 +43,21 @@ Khi tôi gửi tin nhắn bắt đầu bằng `#CAPNHAT`, mỗi dòng là một 
 
 - Dòng nào không rõ (sai cú pháp, node không tồn tại, thiếu node cha…) thì hỏi lại, không đoán.
 - Vẫn áp dụng quy tắc 2: tóm tắt các thay đổi trước, chờ tôi xác nhận rồi mới sửa và push.
+
+## Sổ từ vựng
+
+- Notebook N là node `Vocabulary Notebook #N`, cha là `Writing/Reading/Vocabulary`, nhóm `Language`. Nội dung nằm ở `vocab/vocab-notebook-N.md`, lưu nguyên văn những gì tôi gửi.
+- **Từ vựng không phải node.** Chúng chỉ nằm trong `notes[...].words` và trong file `.md`.
+- `words` lấy từ các tiêu đề dạng `### ① WORD (loại từ) — nghĩa`: chỉ lấy phần WORD, viết thường, giữ đúng thứ tự trong file. Số từ phải khớp với số tiêu đề.
+- Mỗi từ là một tiêu đề `### <số khoanh> WORD (...) — ...`, theo sau là các dòng `**Def:**`, `**Syn:**`, `**Ex:**`, `**WF:**`, `**Coll:**`, `**Q:**`. Trang web đọc thẻ từ theo đúng định dạng này.
+- **Không tạo notebook rỗng.** Notebook #1–#5 chờ tôi gửi nội dung.
+- Thư viện render Markdown được lưu sẵn trong repo: `vendor/marked-12.0.2.min.js`.
+
+| Lệnh | Cú pháp | Tác dụng |
+|---|---|---|
+| SOTAY | `SOTAY: N \| nguồn` + nội dung .md tôi dán kèm | Tạo `vocab/vocab-notebook-N.md` (nguyên văn). Thêm node `Vocabulary Notebook #N` (cha: `Writing/Reading/Vocabulary`). Thêm `notes` kiểu notebook, với `words` lấy từ các tiêu đề và `created` = ngày hôm đó. Không có nội dung thì không tạo. |
+| TU | `TU: N` + khối nội dung của từ (tiêu đề số tiếp theo + Def/Syn/Ex/WF/Coll/Q) | Thêm khối vào file `.md` của notebook N, rồi thêm từ vào cuối `words`. Thêm trước phần `## 🧠 MEMORY MAP` nếu có, nếu không có thì thêm vào cuối file. |
+| XOATU | `XOATU: N \| từ` | Xóa mục của từ đó trong file `.md` và trong `words`. Hỏi tôi trước khi đánh lại số thứ tự ①… hay sửa các dòng tóm tắt (Story, Memory map, "✅ x/x words"). |
 
 ## Dán JSON từ nút "Xuất dữ liệu"
 

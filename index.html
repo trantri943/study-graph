@@ -49,6 +49,24 @@ input:focus-visible{outline:none;border-color:var(--accent)}
 .toast{position:fixed;left:50%;bottom:calc(56px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel);border:1px solid var(--accent);border-radius:8px;padding:8px 14px;font-size:13px}
 .err{position:fixed;inset:0;display:grid;place-items:center;padding:16px;text-align:center;color:var(--muted);font-size:14px;line-height:1.5}
 @media (max-width:520px){.panel{top:auto;left:16px;width:auto;bottom:calc(40px + env(safe-area-inset-bottom,0px));max-height:48%}}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{font-size:13px;padding:3px 10px;border-radius:999px}
+.chip.on{border-color:var(--accent);background:rgba(139,124,246,.18)}
+.card{margin-top:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.card h4{margin:0 0 6px;font-size:14px;font-weight:600;line-height:1.4}
+.card dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px;line-height:1.45}
+.card dt{font-family:var(--mono);font-size:11px;color:var(--accent);padding-top:2px}
+.card dd{margin:0}
+.reader{position:fixed;inset:0;z-index:10;background:#000;overflow:auto;-webkit-overflow-scrolling:touch}
+.reader .bar{position:sticky;top:0;display:flex;justify-content:flex-end;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;background:linear-gradient(#000 70%,transparent)}
+.md{max-width:680px;margin:0 auto;padding:0 16px calc(48px + env(safe-area-inset-bottom,0px));font-size:16px;line-height:1.65;color:var(--fg);overflow-wrap:anywhere}
+.md h1{font-size:22px;line-height:1.3;margin:0 0 16px}
+.md h2{font-size:18px;margin:32px 0 8px;padding-bottom:6px;border-bottom:1px solid var(--line);color:#b9b0ff}
+.md h3{font-size:16px;margin:22px 0 4px}
+.md p{margin:0 0 10px}
+.md strong{color:#fff;font-weight:600}
+.md ul{padding-left:20px}
+.md pre{white-space:pre-wrap;font-family:var(--sans)}
 textarea{width:100%;box-sizing:border-box;height:140px;font-family:var(--mono);font-size:11px;color:var(--fg);background:#000;border:1px solid var(--line);border-radius:8px;padding:8px}
 </style>
 </head>
@@ -56,7 +74,7 @@ textarea{width:100%;box-sizing:border-box;height:140px;font-family:var(--mono);f
 
 <canvas id="c"></canvas>
 <div class="top">
-  <input id="q" placeholder="Tìm môn / khái niệm…" autocomplete="off">
+  <input id="q" placeholder="Tìm môn / khái niệm / từ vựng…" autocomplete="off">
   <button id="fitBtn">Căn giữa</button>
   <button id="allBtn" hidden>Xem toàn bộ</button>
   <button id="exportBtn">Xuất dữ liệu</button>
@@ -65,6 +83,8 @@ textarea{width:100%;box-sizing:border-box;height:140px;font-family:var(--mono);f
 <div class="legend" id="legend"></div>
 <div class="panel" id="info" hidden></div>
 <div class="toast" id="toast" hidden></div>
+<div class="reader" id="reader" hidden><div class="bar"><button id="closeReader">Đóng</button></div><div class="md" id="readerBody"></div></div>
+<script src="vendor/marked-12.0.2.min.js"></script>
 
 <script>
 // ---------- Data (loaded from data.json) ----------
@@ -170,7 +190,7 @@ function draw(now){
     ctx.strokeStyle=on?"rgba(139,124,246,.9)":fs?"rgba(120,120,135,.12)":"rgba(150,150,160,.35)";
     ctx.beginPath();ctx.moveTo(l.s.x,l.s.y);ctx.lineTo(l.t.x,l.t.y);ctx.stroke();}
   for(const n of N){ if(!isVis(n)) continue;
-    const match=q&&n.id.toLowerCase().includes(q);
+    const match=q&&nodeMatches(n,q);
     const dim=(fs&&!fs.has(n.id))||(q&&!match);
     ctx.globalAlpha=dim?0.25:1;
     const st=status[n.id]&&STATUS_COLOR[status[n.id].status];
@@ -227,16 +247,21 @@ function setLocal(n){
   } else localSet=null;
   document.getElementById("allBtn").hidden=!n; alpha=Math.max(alpha,0.3);
 }
-function open(n){ setLocal(n); select(n); flyToNode(n); }
+function open(n,word){ setLocal(n); select(n,word); flyToNode(n); }
 
 // ---------- Panel ----------
 const info=document.getElementById("info");
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-function select(n){selected=n; if(!n){info.hidden=true;return}
+function select(n,word){selected=n; if(!n){info.hidden=true;return}
   const note=NOTES[n.id]||{}, has=["definition","example","question","answer"].some(k=>note[k]);
+  const nb=note.type==="notebook";
   const st=status[n.id]||{};
   const sec=(t,v)=>v?`<h3>${t}</h3><p>${esc(v)}</p>`:"";
-  const notesHtml=has?sec("Định nghĩa",note.definition)+sec("Ví dụ",note.example)+sec("Câu hỏi",note.question)
+  const notesHtml=nb?`<p class="hint" style="margin-top:0">${(note.words||[]).length} từ${note.source?" · "+esc(note.source):""}${note.created?" · "+esc(note.created):""}</p>
+      <div class="chips">${(note.words||[]).map(w=>`<button class="chip" data-w="${esc(w)}">${esc(w)}</button>`).join("")}</div>
+      <div id="card"></div>
+      <div class="row"><button id="readBtn">📖 Xem toàn bộ</button></div>`
+    :has?sec("Định nghĩa",note.definition)+sec("Ví dụ",note.example)+sec("Câu hỏi",note.question)
       +(note.answer?`<div class="row"><button id="ansBtn">Hiện đáp án</button></div><p id="ans" hidden style="margin-top:8px">${esc(note.answer)}</p>`:"")
     :`<p class="hint">Chưa có ghi chú</p>`;
   const links=(edgesOf.get(n.id)||[]).map(l=>{const o=l.s===n?l.t:l.s;
@@ -255,6 +280,51 @@ function select(n){selected=n; if(!n){info.hidden=true;return}
   info.querySelectorAll("a[data-id]").forEach(a=>a.onclick=()=>open(byId.get(a.dataset.id)));
   info.querySelectorAll("button.st").forEach(b=>b.onclick=()=>setStatus(n,b.dataset.s));
   document.getElementById("closeInfo").onclick=()=>select(null);
+  if(nb){ info.querySelectorAll(".chip").forEach(c=>c.onclick=()=>showCard(note,c.dataset.w));
+    document.getElementById("readBtn").onclick=()=>openReader(note);
+    if(word) showCard(note,word); }
+}
+
+// ---------- Vocabulary notebooks (content lives in vocab/*.md) ----------
+const mdCache=new Map();
+function loadMd(file){ if(!mdCache.has(file)) mdCache.set(file,fetch(file,{cache:"no-store"})
+    .then(r=>{if(!r.ok) throw new Error("HTTP "+r.status);return r.text()}).catch(e=>{mdCache.delete(file);throw e}));
+  return mdCache.get(file); }
+const wordsOf=id=>{const t=NOTES[id];return t&&t.type==="notebook"&&t.words||[]};
+const nodeMatches=(n,q)=>n.id.toLowerCase().includes(q)||wordsOf(n.id).some(w=>w.toLowerCase().includes(q));
+// "### ① REWARD (n./v.) — ..." followed by "**Def:** ..." lines
+function parseCards(md){
+  const cards=new Map();
+  for(const block of md.split(/^### /m).slice(1)){
+    const lines=block.split("\n"), head=lines[0].trim();
+    const m=head.match(/^[\u2460-\u2473\u3251-\u325f]\s*(.+?)\s*(\(|—|$)/); if(!m) continue;
+    const fields=[]; for(const l of lines.slice(1)){const f=l.match(/^\*\*(\w+):\*\*\s*(.*)$/); if(f) fields.push([f[1],f[2]]);}
+    cards.set(m[1].toLowerCase(),{head,fields});
+  }
+  return cards;
+}
+function showCard(note,word){
+  const el=document.getElementById("card"); if(!el) return;
+  info.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",c.dataset.w===word));
+  el.className="card"; el.textContent="Đang tải…";
+  loadMd(note.file).then(md=>{ if(!el.isConnected) return;
+    const c=parseCards(md).get(word.toLowerCase());
+    el.innerHTML=c?`<h4>${esc(c.head)}</h4><dl>${c.fields.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl>`
+      :`<p class="hint" style="margin:0">Không tìm thấy mục của "${esc(word)}" trong ${esc(note.file)}.</p>`;
+  }).catch(e=>{el.textContent="Không tải được "+note.file+" ("+e.message+")."});
+}
+const reader=document.getElementById("reader"),readerBody=document.getElementById("readerBody");
+function openReader(note){
+  readerBody.textContent="Đang tải…"; reader.hidden=false; reader.scrollTop=0;
+  loadMd(note.file).then(md=>{ readerBody.innerHTML=window.marked?marked.parse(md,{breaks:true}):`<pre>${esc(md)}</pre>`; })
+    .catch(e=>{readerBody.textContent="Không tải được "+note.file+" ("+e.message+")."});
+}
+document.getElementById("closeReader").onclick=()=>{reader.hidden=true};
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!reader.hidden) reader.hidden=true});
+function findWord(q){ // exact word first, then prefix, then substring
+  q=q.toLowerCase(); const all=[];
+  for(const n of N) for(const w of wordsOf(n.id)) all.push([n,w]);
+  return all.find(([,w])=>w.toLowerCase()===q)||all.find(([,w])=>w.toLowerCase().startsWith(q))||all.find(([,w])=>w.toLowerCase().includes(q));
 }
 function setStatus(n,s){
   const cur=status[n.id]&&status[n.id].status;
@@ -276,9 +346,11 @@ document.getElementById("fitBtn").onclick=()=>{select(null);flyTo(fitView())};
 document.getElementById("allBtn").onclick=()=>{setLocal(null);select(null);for(let i=0;i<60;i++)tick();flyTo(fitView())};
 const qEl=document.getElementById("q");
 qEl.addEventListener("input",e=>{query=e.target.value.trim();
-  const m=query&&N.find(n=>isVis(n)&&n.id.toLowerCase().startsWith(query.toLowerCase())); if(m) flyToNode(m);});
+  if(!query) return; const q=query.toLowerCase();
+  const m=N.find(n=>isVis(n)&&n.id.toLowerCase().startsWith(q))||(findWord(q)||[])[0]; if(m&&isVis(m)) flyToNode(m);});
 qEl.addEventListener("keydown",e=>{if(e.key==="Enter"&&query){
-  const m=N.find(n=>n.id.toLowerCase().includes(query.toLowerCase())); if(m){hidden.delete(m.group);drawLegend();open(m);qEl.blur()}}});
+  const q=query.toLowerCase(), m=N.find(n=>n.id.toLowerCase().includes(q)), fw=!m&&findWord(q);
+  const target=m||(fw&&fw[0]); if(target){hidden.delete(target.group);drawLegend();open(target,fw?fw[1]:undefined);qEl.blur()}}});
 
 function drawLegend(){const el=document.getElementById("legend");
   el.innerHTML=Object.keys(GROUPS).map(g=>`<span data-g="${esc(g)}" class="${hidden.has(g)?"off":""}"><i style="background:${color(g)}"></i>${esc(g)}</span>`).join("");
