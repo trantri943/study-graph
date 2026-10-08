@@ -67,6 +67,14 @@ input:focus-visible{outline:none;border-color:var(--accent)}
 .md strong{color:#fff;font-weight:600}
 .md ul{padding-left:20px}
 .md pre{white-space:pre-wrap;font-family:var(--sans)}
+.md details{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:0 0 8px}
+.md details[open]{border-color:var(--accent)}
+.md summary{cursor:pointer;font-weight:500}
+.md details[open] summary{margin-bottom:6px;color:#b9b0ff}
+.md table{display:block;overflow-x:auto;overflow-wrap:normal;border-collapse:collapse;font-size:14px;margin:0 0 12px}
+.md th,.md td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+.md th{color:var(--muted);font-weight:500}
+.md code{font-family:var(--mono);font-size:13px}
 textarea{width:100%;box-sizing:border-box;height:140px;font-family:var(--mono);font-size:11px;color:var(--fg);background:#000;border:1px solid var(--line);border-radius:8px;padding:8px}
 </style>
 </head>
@@ -254,13 +262,14 @@ const info=document.getElementById("info");
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 function select(n,word){selected=n; if(!n){info.hidden=true;return}
   const note=NOTES[n.id]||{}, has=["definition","example","question","answer"].some(k=>note[k]);
-  const nb=note.type==="notebook";
+  const nb=note.type==="notebook", doc=note.type==="doc";
   const st=status[n.id]||{};
   const sec=(t,v)=>v?`<h3>${t}</h3><p>${esc(v)}</p>`:"";
   const notesHtml=nb?`<p class="hint" style="margin-top:0">${(note.words||[]).length} từ${note.source?" · "+esc(note.source):""}${note.created?" · "+esc(note.created):""}</p>
       <div class="chips">${(note.words||[]).map(w=>`<button class="chip" data-w="${esc(w)}">${esc(w)}</button>`).join("")}</div>
       <div id="card"></div>
       <div class="row"><button id="readBtn">📖 Xem toàn bộ</button></div>`
+    :doc?`<div class="row" style="margin-top:0">${(note.files||[]).map((f,i)=>`<button class="docBtn" data-i="${i}">📖 ${esc(f.title)}</button>`).join("")}</div>`
     :has?sec("Định nghĩa",note.definition)+sec("Ví dụ",note.example)+sec("Câu hỏi",note.question)
       +(note.answer?`<div class="row"><button id="ansBtn">Hiện đáp án</button></div><p id="ans" hidden style="margin-top:8px">${esc(note.answer)}</p>`:"")
     :`<p class="hint">Chưa có ghi chú</p>`;
@@ -281,8 +290,9 @@ function select(n,word){selected=n; if(!n){info.hidden=true;return}
   info.querySelectorAll("button.st").forEach(b=>b.onclick=()=>setStatus(n,b.dataset.s));
   document.getElementById("closeInfo").onclick=()=>select(null);
   if(nb){ info.querySelectorAll(".chip").forEach(c=>c.onclick=()=>showCard(note,c.dataset.w));
-    document.getElementById("readBtn").onclick=()=>openReader(note);
+    document.getElementById("readBtn").onclick=()=>openReader(note.file);
     if(word) showCard(note,word); }
+  if(doc) info.querySelectorAll(".docBtn").forEach(b=>b.onclick=()=>openReader(note.files[+b.dataset.i].file));
 }
 
 // ---------- Vocabulary notebooks (content lives in vocab/*.md) ----------
@@ -314,10 +324,10 @@ function showCard(note,word){
   }).catch(e=>{el.textContent="Không tải được "+note.file+" ("+e.message+")."});
 }
 const reader=document.getElementById("reader"),readerBody=document.getElementById("readerBody");
-function openReader(note){
+function openReader(file){
   readerBody.textContent="Đang tải…"; reader.hidden=false; reader.scrollTop=0;
-  loadMd(note.file).then(md=>{ readerBody.innerHTML=window.marked?marked.parse(md,{breaks:true}):`<pre>${esc(md)}</pre>`; })
-    .catch(e=>{readerBody.textContent="Không tải được "+note.file+" ("+e.message+")."});
+  loadMd(file).then(md=>{ readerBody.innerHTML=window.marked?marked.parse(md,{breaks:true}):`<pre>${esc(md)}</pre>`; })
+    .catch(e=>{readerBody.textContent="Không tải được "+file+" ("+e.message+")."});
 }
 document.getElementById("closeReader").onclick=()=>{reader.hidden=true};
 addEventListener("keydown",e=>{if(e.key==="Escape"&&!reader.hidden) reader.hidden=true});

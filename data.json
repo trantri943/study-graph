@@ -40,6 +40,41 @@
       "parent": "Listening and Speaking"
     },
     {
+      "id": "Fasting, Nature & the Brain",
+      "group": "Language",
+      "parent": "Presentation"
+    },
+    {
+      "id": "Intermittent Fasting",
+      "group": "Language",
+      "parent": "Fasting, Nature & the Brain"
+    },
+    {
+      "id": "Being in Nature",
+      "group": "Language",
+      "parent": "Fasting, Nature & the Brain"
+    },
+    {
+      "id": "Limitations",
+      "group": "Language",
+      "parent": "Fasting, Nature & the Brain"
+    },
+    {
+      "id": "The Answer & Weekly Plan",
+      "group": "Language",
+      "parent": "Fasting, Nature & the Brain"
+    },
+    {
+      "id": "Slide Design Rules",
+      "group": "Language",
+      "parent": "Fasting, Nature & the Brain"
+    },
+    {
+      "id": "References & Source Quality",
+      "group": "Language",
+      "parent": "Fasting, Nature & the Brain"
+    },
+    {
       "id": "Writing/Reading/Vocabulary",
       "group": "Language",
       "parent": "English (ALI)"
@@ -60,7 +95,26 @@
       "parent": "Writing/Reading/Vocabulary"
     }
   ],
-  "links": [],
+  "links": [
+    {
+      "source": "Intermittent Fasting",
+      "target": "Being in Nature",
+      "relation": "contrasts",
+      "note": "Fasting 2/5 (strong in mice, mixed in people) vs Nature 4/5 (brain scans + controlled experiments in people)."
+    },
+    {
+      "source": "Limitations",
+      "target": "Intermittent Fasting",
+      "relation": "limits",
+      "note": "Mostly proven in mice; NIA 2024 was a small study (~40 adults, 8 weeks)."
+    },
+    {
+      "source": "Limitations",
+      "target": "Being in Nature",
+      "relation": "limits",
+      "note": "Small, short-term, some only correlations — why nature is 4/5, not 5."
+    }
+  ],
   "notes": {
     "Vocabulary Notebook #5": {
       "type": "notebook",
@@ -125,6 +179,54 @@
       ],
       "source": "Holes – Louis Sachar",
       "created": "2026-10-08"
+    },
+    "Fasting, Nature & the Brain": {
+      "type": "doc",
+      "files": [
+        {
+          "title": "Tài liệu gốc",
+          "file": "docs/fasting-nature-brain.md"
+        },
+        {
+          "title": "Study pack",
+          "file": "docs/fasting-nature-brain-study.md"
+        }
+      ],
+      "created": "2026-10-08"
+    },
+    "Intermittent Fasting": {
+      "definition": "Eat in a time window (e.g., 8 h), fast the rest.",
+      "example": "Metabolic switch: after ~12 h without food, glucose runs low → body burns fat → ketones (backup brain fuel) → BDNF ↑ — shown in mice.",
+      "question": "Is fasting safe?",
+      "answer": "12-h overnight is a gentle start for healthy adults; certain groups must ask a doctor."
+    },
+    "Being in Nature": {
+      "definition": "Parks, forests, beaches.",
+      "example": "Stanford 2015 (Bratman): 90-min nature walk → less rumination; city walk = no change.",
+      "question": "Does a city park count?",
+      "answer": "Yes; studies counted parks/green spaces."
+    },
+    "Limitations": {
+      "definition": "SMALL (often <100 people), SHORT (hours–weeks, not years), LINKS (correlation ≠ causation).",
+      "example": "Cal State LA 2024 student study, 18 people.",
+      "question": "Why nature 4/5 not 5?",
+      "answer": "Small, short-term, some only correlations."
+    },
+    "The Answer & Weekly Plan": {
+      "definition": "Both can help, but the proof is not equal. Fasting = 2/5, Nature = 4/5 (presenter's own summary, not a published score).",
+      "example": "Every night 12-h overnight fast (dinner 7 pm → breakfast 7 am); 3× a week 40 min outdoors = 120 min.",
+      "question": "Do both together?",
+      "answer": "Yes, e.g., morning park walk before breakfast; start slowly."
+    },
+    "Slide Design Rules": {
+      "definition": "One message per slide; no full sentences to read (redundancy effect); most important = biggest; guide focus with contrast; max ~6 objects.",
+      "example": "Subitizing (Kaufman et al., 1949); working memory ≈ 4±1 chunks (Cowan, 2001)."
+    },
+    "References & Source Quality": {
+      "definition": "Peer-reviewed journal > book > student project.",
+      "example": "On CSULB OneSearch, filter \"Peer-reviewed Journals\"; \"Source: CSU_SCHOLARWORKS\" usually = student work.",
+      "question": "Sources?",
+      "answer": "Peer-reviewed journals + CSULB library; listed on last slides."
     }
   },
   "status": {}

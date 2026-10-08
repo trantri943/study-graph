@@ -17,6 +17,7 @@ Trang Study Graph (GitHub Pages). Giao diện nằm trong `index.html`, **dữ l
 - `nodes`: node gốc của nhóm có `parent: null`. Node con trỏ tới node cha qua `parent` và thuộc cùng `group` với cha. `level` không bắt buộc, hiện thành nhãn "Level n" trong panel.
 - `links`: đường nối ngang có nhãn, giữa hai node bất kỳ. Cả hai node phải có trong `nodes`.
 - `notes` của node sổ từ vựng có dạng khác: `{"type": "notebook", "file": "vocab/vocab-notebook-N.md", "words": [...], "source": "...", "created": "YYYY-MM-DD"}`. Xem mục "Sổ từ vựng" bên dưới.
+- `notes` của node tài liệu có dạng: `{"type": "doc", "files": [{"title": "Tên nút", "file": "docs/....md"}], "created": "YYYY-MM-DD"}`. Panel hiện một nút "📖 <title>" cho mỗi file, bấm vào thì mở khung đọc. Tài liệu gốc lưu nguyên văn trong `docs/`. Phần soạn thêm từ tài liệu (study pack: flashcards, quiz, memory path…) để ở một file riêng, chỉ dùng nội dung có trong tài liệu gốc. Nhãn KNOWN/LIKELY/UNCERTAIN chỉ ghi khi tài liệu đã ghi, còn lại ghi "(chưa đánh giá)".
 - `notes`, `status`: khóa là `id` của node. Trường nào chưa có dữ liệu thì bỏ trống hoặc không ghi.
 - `id` phải duy nhất. Khi đổi tên một node, phải đổi ở mọi chỗ: `parent`, `links`, `notes`, `status`.
 
