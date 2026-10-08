@@ -916,6 +916,36 @@
       "target": "Routing",
       "relation": "được dùng khi",
       "note": "routing đi dây trên các lớp kim loại"
+    },
+    {
+      "source": "English (ALI)",
+      "target": "Electrical & Electronic Eng.",
+      "relation": "là công cụ để học",
+      "note": "tài liệu, khóa học, phỏng vấn và công việc ngành EEE đều dùng tiếng Anh"
+    },
+    {
+      "source": "Writing/Reading/Vocabulary",
+      "target": "Technical Writing",
+      "relation": "hỗ trợ",
+      "note": "viết báo cáo kỹ thuật cần ngữ pháp và từ vựng học thuật"
+    },
+    {
+      "source": "Presentation",
+      "target": "Senior Design (Capstone)",
+      "relation": "dùng để",
+      "note": "trình bày đồ án tốt nghiệp trước hội đồng"
+    },
+    {
+      "source": "Listening and Speaking",
+      "target": "Engineering Practice",
+      "relation": "hỗ trợ",
+      "note": "họp nhóm, phỏng vấn kỹ thuật"
+    },
+    {
+      "source": "Business",
+      "target": "Engineering Ethics",
+      "relation": "liên quan",
+      "note": "giao tiếp chuyên nghiệp và đạo đức nghề nghiệp"
     }
   ],
   "notes": {
