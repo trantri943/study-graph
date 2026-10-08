@@ -14,6 +14,561 @@
       "parent": null
     },
     {
+      "id": "Math & Science Foundations",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Circuits & Electronics",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Signals, Systems & Control",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Electromagnetics & RF",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Communications",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Power & Energy",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Computer Engineering",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Integrated Circuits (Vi mạch)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Instrumentation & Lab",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Engineering Practice",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electrical & Electronic Eng."
+    },
+    {
+      "id": "Calculus",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Math & Science Foundations"
+    },
+    {
+      "id": "Differential Equations",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Math & Science Foundations"
+    },
+    {
+      "id": "Linear Algebra",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Math & Science Foundations"
+    },
+    {
+      "id": "Probability & Statistics",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Math & Science Foundations"
+    },
+    {
+      "id": "Complex Variables",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Math & Science Foundations"
+    },
+    {
+      "id": "Physics (Mechanics, E&M)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Math & Science Foundations"
+    },
+    {
+      "id": "Chemistry",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Math & Science Foundations"
+    },
+    {
+      "id": "Circuit Analysis (DC/AC)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Circuits & Electronics"
+    },
+    {
+      "id": "Electronic Devices",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Circuits & Electronics"
+    },
+    {
+      "id": "Analog Electronics",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Circuits & Electronics"
+    },
+    {
+      "id": "Digital Electronics",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Circuits & Electronics"
+    },
+    {
+      "id": "Signals & Systems",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Signals, Systems & Control"
+    },
+    {
+      "id": "Digital Signal Processing",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Signals, Systems & Control"
+    },
+    {
+      "id": "Control Systems",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Signals, Systems & Control"
+    },
+    {
+      "id": "Electromagnetic Fields",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electromagnetics & RF"
+    },
+    {
+      "id": "Transmission Lines",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electromagnetics & RF"
+    },
+    {
+      "id": "Antennas",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electromagnetics & RF"
+    },
+    {
+      "id": "RF / Microwave",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Electromagnetics & RF"
+    },
+    {
+      "id": "Analog & Digital Communications",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Communications"
+    },
+    {
+      "id": "Wireless Communications",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Communications"
+    },
+    {
+      "id": "Computer Networks",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Communications"
+    },
+    {
+      "id": "Electric Machines",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Power & Energy"
+    },
+    {
+      "id": "Power Systems",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Power & Energy"
+    },
+    {
+      "id": "Power Electronics",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Power & Energy"
+    },
+    {
+      "id": "Renewable Energy (Solar)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Power & Energy"
+    },
+    {
+      "id": "Programming (C, Python)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Computer Engineering"
+    },
+    {
+      "id": "Digital Logic Design",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Computer Engineering"
+    },
+    {
+      "id": "Computer Architecture",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Computer Engineering"
+    },
+    {
+      "id": "Microcontrollers & Embedded Systems",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Computer Engineering"
+    },
+    {
+      "id": "Semiconductor Physics",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Integrated Circuits (Vi mạch)"
+    },
+    {
+      "id": "Semiconductor Devices",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Integrated Circuits (Vi mạch)"
+    },
+    {
+      "id": "IC Fabrication",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Integrated Circuits (Vi mạch)"
+    },
+    {
+      "id": "Analog IC Design",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Integrated Circuits (Vi mạch)"
+    },
+    {
+      "id": "Digital IC Design",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Integrated Circuits (Vi mạch)"
+    },
+    {
+      "id": "ASIC Design Flow",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Integrated Circuits (Vi mạch)"
+    },
+    {
+      "id": "Physical Design",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Integrated Circuits (Vi mạch)"
+    },
+    {
+      "id": "EDA Tools & Scripting",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Integrated Circuits (Vi mạch)"
+    },
+    {
+      "id": "Measurement & Instruments",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Instrumentation & Lab"
+    },
+    {
+      "id": "Sensors",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Instrumentation & Lab"
+    },
+    {
+      "id": "Senior Design (Capstone)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Engineering Practice"
+    },
+    {
+      "id": "Engineering Ethics",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Engineering Practice"
+    },
+    {
+      "id": "Technical Writing",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Engineering Practice"
+    },
+    {
+      "id": "Band Theory (Conduction / Valence / Band Gap)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Physics"
+    },
+    {
+      "id": "Electrons & Holes",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Physics"
+    },
+    {
+      "id": "Doping (n-type / p-type)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Physics"
+    },
+    {
+      "id": "Drift & Diffusion",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Physics"
+    },
+    {
+      "id": "PN Junction",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Physics"
+    },
+    {
+      "id": "Diode",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Devices"
+    },
+    {
+      "id": "BJT",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Devices"
+    },
+    {
+      "id": "MOSFET",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Devices"
+    },
+    {
+      "id": "Threshold Voltage",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Devices"
+    },
+    {
+      "id": "Short-channel Effects",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Devices"
+    },
+    {
+      "id": "CMOS",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Devices"
+    },
+    {
+      "id": "FinFET",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Devices"
+    },
+    {
+      "id": "GAA (Nanosheet)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Semiconductor Devices"
+    },
+    {
+      "id": "Wafer",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "Oxidation",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "Photolithography (DUV / EUV)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "Etching",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "Deposition (CVD / PVD / ALD)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "Ion Implantation",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "CMP",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "Interconnect (Metal Layers)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "Packaging & Test",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "Yield",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "IC Fabrication"
+    },
+    {
+      "id": "Current Mirror",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Analog IC Design"
+    },
+    {
+      "id": "Differential Pair",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Analog IC Design"
+    },
+    {
+      "id": "Op-Amp",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Analog IC Design"
+    },
+    {
+      "id": "Bandgap Reference",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Analog IC Design"
+    },
+    {
+      "id": "ADC / DAC",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Analog IC Design"
+    },
+    {
+      "id": "PLL",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Analog IC Design"
+    },
+    {
+      "id": "Noise & Matching",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Analog IC Design"
+    },
+    {
+      "id": "CMOS Logic Gates",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Digital IC Design"
+    },
+    {
+      "id": "Combinational & Sequential Logic",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Digital IC Design"
+    },
+    {
+      "id": "RTL (Verilog / VHDL)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Digital IC Design"
+    },
+    {
+      "id": "Timing (Setup / Hold)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Digital IC Design"
+    },
+    {
+      "id": "Low-power Design",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Digital IC Design"
+    },
+    {
+      "id": "Memory (SRAM / DRAM / Flash)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Digital IC Design"
+    },
+    {
+      "id": "1 Specification",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "ASIC Design Flow"
+    },
+    {
+      "id": "2 RTL Design",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "ASIC Design Flow"
+    },
+    {
+      "id": "3 Verification (Simulation / UVM)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "ASIC Design Flow"
+    },
+    {
+      "id": "4 Logic Synthesis",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "ASIC Design Flow"
+    },
+    {
+      "id": "5 DFT (Design for Test)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "ASIC Design Flow"
+    },
+    {
+      "id": "6 Physical Design",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "ASIC Design Flow"
+    },
+    {
+      "id": "7 Signoff",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "ASIC Design Flow"
+    },
+    {
+      "id": "8 Tape-out",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "ASIC Design Flow"
+    },
+    {
+      "id": "Floorplanning",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Physical Design"
+    },
+    {
+      "id": "Power Planning (Power Grid)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Physical Design"
+    },
+    {
+      "id": "Placement",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Physical Design"
+    },
+    {
+      "id": "Clock Tree Synthesis (CTS)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Physical Design"
+    },
+    {
+      "id": "Routing",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Physical Design"
+    },
+    {
+      "id": "Static Timing Analysis (STA)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Physical Design"
+    },
+    {
+      "id": "DRC / LVS",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Physical Design"
+    },
+    {
+      "id": "IR Drop & Electromigration",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Physical Design"
+    },
+    {
+      "id": "PPA (Power / Performance / Area)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "Physical Design"
+    },
+    {
+      "id": "Cadence (Virtuoso, Genus, Innovus)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "EDA Tools & Scripting"
+    },
+    {
+      "id": "Synopsys (Design Compiler, ICC2, PrimeTime)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "EDA Tools & Scripting"
+    },
+    {
+      "id": "Siemens (Calibre)",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "EDA Tools & Scripting"
+    },
+    {
+      "id": "Tcl",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "EDA Tools & Scripting"
+    },
+    {
+      "id": "Python",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "EDA Tools & Scripting"
+    },
+    {
+      "id": "Linux",
+      "group": "Electrical & Electronic Eng.",
+      "parent": "EDA Tools & Scripting"
+    },
+    {
       "id": "Language",
       "group": "Language",
       "parent": null
@@ -223,6 +778,144 @@
       "target": "Holes (Louis Sachar)",
       "relation": "trích từ",
       "note": "từ vựng học qua tiểu thuyết"
+    },
+    {
+      "source": "1 Specification",
+      "target": "2 RTL Design",
+      "relation": "bước tiếp theo",
+      "note": "quy trình thiết kế chip"
+    },
+    {
+      "source": "2 RTL Design",
+      "target": "3 Verification (Simulation / UVM)",
+      "relation": "bước tiếp theo",
+      "note": "quy trình thiết kế chip"
+    },
+    {
+      "source": "3 Verification (Simulation / UVM)",
+      "target": "4 Logic Synthesis",
+      "relation": "bước tiếp theo",
+      "note": "quy trình thiết kế chip"
+    },
+    {
+      "source": "4 Logic Synthesis",
+      "target": "5 DFT (Design for Test)",
+      "relation": "bước tiếp theo",
+      "note": "quy trình thiết kế chip"
+    },
+    {
+      "source": "5 DFT (Design for Test)",
+      "target": "6 Physical Design",
+      "relation": "bước tiếp theo",
+      "note": "quy trình thiết kế chip"
+    },
+    {
+      "source": "6 Physical Design",
+      "target": "7 Signoff",
+      "relation": "bước tiếp theo",
+      "note": "quy trình thiết kế chip"
+    },
+    {
+      "source": "7 Signoff",
+      "target": "8 Tape-out",
+      "relation": "bước tiếp theo",
+      "note": "quy trình thiết kế chip"
+    },
+    {
+      "source": "6 Physical Design",
+      "target": "Physical Design",
+      "relation": "chi tiết ở",
+      "note": "các bước con của Physical Design"
+    },
+    {
+      "source": "Physics (Mechanics, E&M)",
+      "target": "Semiconductor Physics",
+      "relation": "là nền tảng của",
+      "note": "điện trường và năng lượng giải thích hành vi của hạt dẫn"
+    },
+    {
+      "source": "Semiconductor Physics",
+      "target": "Semiconductor Devices",
+      "relation": "là nền tảng của",
+      "note": "PN junction là cơ sở của diode, BJT, MOSFET"
+    },
+    {
+      "source": "Semiconductor Devices",
+      "target": "IC Fabrication",
+      "relation": "được tạo ra bằng",
+      "note": "linh kiện được chế tạo trên wafer"
+    },
+    {
+      "source": "Electronic Devices",
+      "target": "Semiconductor Devices",
+      "relation": "mở rộng thành",
+      "note": "môn học cơ sở đi sâu vào linh kiện bán dẫn"
+    },
+    {
+      "source": "Circuit Analysis (DC/AC)",
+      "target": "Analog IC Design",
+      "relation": "là nền tảng của",
+      "note": "phân tích mạch dùng để thiết kế mạch tương tự"
+    },
+    {
+      "source": "Analog Electronics",
+      "target": "Analog IC Design",
+      "relation": "mở rộng thành",
+      "note": "từ mạch rời sang mạch tích hợp"
+    },
+    {
+      "source": "Digital Logic Design",
+      "target": "Digital IC Design",
+      "relation": "là nền tảng của",
+      "note": "cổng logic và flip-flop là khối xây dựng của chip số"
+    },
+    {
+      "source": "Digital Electronics",
+      "target": "Digital IC Design",
+      "relation": "mở rộng thành",
+      "note": "từ mạch số rời sang chip số"
+    },
+    {
+      "source": "Computer Architecture",
+      "target": "Digital IC Design",
+      "relation": "áp dụng",
+      "note": "CPU, cache, pipeline được hiện thực bằng chip số"
+    },
+    {
+      "source": "Programming (C, Python)",
+      "target": "EDA Tools & Scripting",
+      "relation": "hỗ trợ",
+      "note": "viết script tự động hóa công cụ thiết kế"
+    },
+    {
+      "source": "Tcl",
+      "target": "Physical Design",
+      "relation": "dùng để",
+      "note": "điều khiển Innovus / ICC2 bằng script"
+    },
+    {
+      "source": "Timing (Setup / Hold)",
+      "target": "Static Timing Analysis (STA)",
+      "relation": "được kiểm tra bằng",
+      "note": "STA kiểm tra setup/hold trên toàn chip"
+    },
+    {
+      "source": "MOSFET",
+      "target": "CMOS",
+      "relation": "là thành phần của",
+      "note": "CMOS = NMOS + PMOS"
+    },
+    {
+      "source": "CMOS",
+      "target": "CMOS Logic Gates",
+      "relation": "dùng để xây",
+      "note": "cổng logic số làm từ CMOS"
+    },
+    {
+      "source": "Interconnect (Metal Layers)",
+      "target": "Routing",
+      "relation": "được dùng khi",
+      "note": "routing đi dây trên các lớp kim loại"
     }
   ],
   "notes": {

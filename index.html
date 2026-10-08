@@ -160,6 +160,7 @@ function init(data){
     L.push(l); adj.get(a).add(b); adj.get(b).add(a); edgesOf.get(a).push(l); edgesOf.get(b).push(l); };
   for(const n of N) if(n.parent) addEdge(n.parent,n.id,"","",true);
   for(const l of data.links||[]) addEdge(l.source,l.target,l.relation,l.note,false);
+  for(const n of N) n.kids=N.filter(m=>m.parent===n.id).length;
   for(const n of N){ n.deg=adj.get(n.id).size; n.r=BASE_R[n.depth]||BASE_R_DEEP; n.nb=(NOTES[n.id]||{}).type==="notebook"; }
   document.getElementById("stat").textContent=N.length+" nodes · "+L.length+" links";
   drawLegend();
@@ -180,7 +181,7 @@ function tick(){
       const f=-1200*alpha/d2; dx*=f;dy*=f; a.vx+=dx;a.vy+=dy;b.vx-=dx;b.vy-=dy;}}
   for(const l of L){ if(!isVis(l.s)||!isVis(l.t)) continue;
     const dx=l.t.x-l.s.x,dy=l.t.y-l.s.y,d=Math.sqrt(dx*dx+dy*dy)||1;
-    const dm=Math.min(l.s.depth,l.t.depth), rest=l.tree?(dm===0?100:dm===1?65:45):70;
+    const dm=Math.min(l.s.depth,l.t.depth), rest=l.tree?(dm===0?60+18*Math.sqrt(l.s.kids||1):dm===1?60:40):70;  // roots with many branches spread wider
     const k=(d-rest)/d*0.06*alpha; l.s.vx+=dx*k;l.s.vy+=dy*k;l.t.vx-=dx*k;l.t.vy-=dy*k;}
   for(const n of vis){ const g=(n.depth===0?0.018:0.008)*alpha; n.vx-=n.x*g; n.vy-=n.y*g;  // roots pulled harder so lone groups stay close
     if(n===drag){n.vx=n.vy=0;continue}
@@ -248,6 +249,7 @@ function draw(now){
     ctx.lineWidth=(on?1.5:1)/k; ctx.setLineDash(l.tree?[]:[4/k,4/k]);
     ctx.beginPath();ctx.moveTo(l.s.x,l.s.y);ctx.lineTo(l.t.x,l.t.y);ctx.stroke();}
   ctx.setLineDash([]);
+  const labels=[];
   for(const n of N){ if(!isVis(n)) continue;
     const match=q&&nodeMatches(n,q);
     const dim=(fs&&!fs.has(n.id))||(q&&!match);
@@ -260,10 +262,21 @@ function draw(now){
     const [px,wt]=label(n);
     const near=(fs&&fs.has(n.id))||(selected&&adj.get(selected.id).has(n.id))||n===selected;
     const showLabel=n.depth<=1||localSet||near||match||(n.depth===2&&k>=1.2)||k>=2;
-    if(showLabel){ctx.fillStyle=n.depth===0?"#FFFFFF":n.depth===1?"#ECEDF2":n.depth===2?"#D9DBE3":"#C9CCD6";
-      ctx.font=`${wt} ${px/k}px IBM Plex Sans, system-ui, sans-serif`;
-      ctx.textAlign="center";ctx.textBaseline="alphabetic";ctx.fillText(n.id,n.x,n.y+r+(px+4)/k);}
+    if(showLabel) labels.push({n,px,wt,y:n.y+r+(px+4)/k,a:dim?0.25:1,
+      prio:n.depth===0?0:(n===selected||n===hover)?1:match?2:near?3:4+n.depth});
     ctx.globalAlpha=1;}
+  // labels: highest priority first; skip any that would overlap one already drawn (it appears on zoom-in)
+  labels.sort((a,b)=>a.prio-b.prio);
+  const placed=[]; ctx.textAlign="center";ctx.textBaseline="alphabetic";
+  for(const L of labels){ const n=L.n;
+    ctx.font=`${L.wt} ${L.px}px IBM Plex Sans, system-ui, sans-serif`;
+    const w=ctx.measureText(n.id).width, sx=n.x*k+W/2+view.x, sy=L.y*k+H/2+view.y;
+    const box=[sx-w/2-2,sy-L.px,sx+w/2+2,sy+L.px*0.3];
+    if(L.prio>0&&placed.some(b=>box[0]<b[2]&&box[2]>b[0]&&box[1]<b[3]&&box[3]>b[1])) continue;
+    placed.push(box);
+    ctx.globalAlpha=L.a; ctx.fillStyle=n.depth===0?"#FFFFFF":n.depth===1?"#ECEDF2":n.depth===2?"#D9DBE3":"#C9CCD6";
+    ctx.font=`${L.wt} ${L.px/k}px IBM Plex Sans, system-ui, sans-serif`; ctx.fillText(n.id,n.x,L.y); }
+  ctx.globalAlpha=1;
   if(f) for(const l of edgesOf.get(f.id)||[]){ // relation labels at edge midpoints
     if(!l.relation||!isVis(l.s)||!isVis(l.t)) continue;
     const mx=(l.s.x+l.t.x)/2,my=(l.s.y+l.t.y)/2,px=11/k;
