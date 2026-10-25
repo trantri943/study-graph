@@ -1,6 +1,10 @@
 import { TONES, CATEGORIES, FORMALITY, WHO, CHARACTERS, LEXICON, SCENARIOS, UNNATURAL, LESSONS } from "./content.js";
 import { offlineFeedback } from "./coach.js";
 
+const FORM_SHORT = { 1: "Rất suồng sã", 2: "Thân mật", 3: "Trung tính" };
+const WHO_SHORT = { z: "Gen Z", y: "Gen Z & Millennials", a: "Mọi lứa tuổi" };
+const LEVELS = ["An toàn", "Tự nhiên", "Táo bạo"];
+
 // ---------- Lưu trữ ----------
 const KEY = "textlikeanative.v1";
 const DEFAULT = { theme: "auto", apiKey: "", bank: {}, done: {}, convos: 0, activity: {}, quiz: {}, lessons: {}, reviews: 0 };
@@ -47,7 +51,7 @@ function streak() {
 function applyTheme() {
   document.documentElement.dataset.theme = S.theme;
   const dark = S.theme === "dark" || (S.theme === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
-  $('meta[name="theme-color"]').content = dark ? "#000000" : "#ffffff";
+  $('meta[name="theme-color"]').content = dark ? "#09090b" : "#fafafa";
 }
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
 
@@ -69,7 +73,7 @@ function meet(terms) {
       added++;
     }
   }
-  if (added) { save(); toast(`📥 +${added} từ mới vào kho từ`); }
+  if (added) { save(); toast(`+${added} từ mới vào kho từ`); }
 }
 function grade(term, ok) {
   const b = S.bank[term];
@@ -119,28 +123,28 @@ function renderHome() {
   $("#main").innerHTML = `
     <p class="lead">Luyện nhắn tin kiểu Mỹ. Chạm vào tin nhắn bất kỳ để xem nghĩa, slang và gợi ý trả lời.</p>
     <h2>Kịch bản</h2>
-    <div class="cards">${SCENARIOS.map((s) => `
-      <button class="card scen" data-id="${s.id}">
+    <div class="list">${SCENARIOS.map((s) => `
+      <button class="item" data-id="${s.id}">
         <span class="avatars">${s.chars.map((c) => avatar(c)).join("")}</span>
-        <span class="info"><b>${s.emoji} ${esc(s.title)}</b><small>${esc(s.en)} · ${s.chars.map((c) => CHARACTERS[c].name).join(", ")}</small><small class="muted">${esc(s.desc)}</small></span>
-        ${S.done[s.id] ? `<span class="badge">✓ ${S.done[s.id]}</span>` : ""}
+        <span class="info"><b>${esc(s.title)}</b><small>${esc(s.en)} · ${s.chars.map((c) => CHARACTERS[c].name).join(", ")}</small></span>
+        ${S.done[s.id] ? `<span class="meta-r ok">Đã xong${S.done[s.id] > 1 ? ` ×${S.done[s.id]}` : ""}</span>` : ""}
       </button>`).join("")}
     </div>
     <h2>Chat tự do với AI</h2>
-    <button class="card scen ai" id="free-chat">
-      <span class="avatars"><span class="av" style="background:#38BDF8">✨</span></span>
-      <span class="info"><b>Chọn nhân vật và chủ đề</b><small>Nhân vật trả lời theo những gì bạn viết, có phản hồi chi tiết cho từng câu.</small><small class="muted">${S.apiKey ? "Đã có API key ✓" : "Cần API key Claude (⚙️ Cài đặt)"}</small></span>
-    </button>
+    <button class="feature" id="free-chat"><b>Chọn nhân vật và chủ đề</b><small>Nhân vật trả lời theo đúng những gì bạn viết, kèm nhận xét chi tiết cho từng câu.</small><span class="pill">${S.apiKey ? "Đã có API key" : "Cần API key Claude"}</span></button>
     <h2>Nhân vật</h2>
-    <div class="chars">${Object.entries(CHARACTERS).map(([id, c]) => `
-      <div class="char">${avatar(id)}<div><b>${c.name}, ${c.age}</b><small>${esc(c.role)}</small><small class="muted">${esc(c.style)}</small></div></div>`).join("")}
+    <div class="list">${Object.entries(CHARACTERS).map(([id, c]) => `
+      <div class="item">${avatar(id)}<span class="info"><b>${c.name}, ${c.age}</b><small>${esc(c.role)} · ${esc(c.style)}</small></span></div>`).join("")}
     </div>`;
-  $("#main").querySelectorAll(".scen[data-id]").forEach((b) => b.addEventListener("click", () => startScripted(SCENARIOS.find((s) => s.id === b.dataset.id))));
+  $("#main").querySelectorAll(".item[data-id]").forEach((b) => b.addEventListener("click", () => startScripted(SCENARIOS.find((s) => s.id === b.dataset.id))));
   $("#free-chat").addEventListener("click", openFreeChatSetup);
 }
 function avatar(id) {
   const c = CHARACTERS[id];
-  return `<span class="av" style="background:${c.color}">${c.avatar}</span>`;
+  return `<span class="av" style="background:color-mix(in srgb, ${c.color} 18%, transparent);color:${c.color}">${c.name[0]}</span>`;
+}
+function groupAvatar(chars) {
+  return `<span class="avatars">${chars.map(avatar).join("")}</span>`;
 }
 
 // ---------- Chat engine ----------
@@ -148,7 +152,7 @@ let chat = null;
 
 function openChatView(title, chars) {
   $("#chat").hidden = false;
-  $("#chat-title").innerHTML = `${chars.length > 1 ? `<span class="av sm" style="background:#38BDF8">👥</span>` : avatar(chars[0])}<span><b>${esc(title)}</b><small id="chat-status">${chars.length > 1 ? chars.map((c) => CHARACTERS[c].name).join(", ") : esc(CHARACTERS[chars[0]].role)}</small></span>`;
+  $("#chat-title").innerHTML = `${chars.length > 1 ? groupAvatar(chars) : avatar(chars[0])}<span><b>${esc(title)}</b><small id="chat-status">${chars.length > 1 ? chars.map((c) => CHARACTERS[c].name).join(", ") : esc(CHARACTERS[chars[0]].role)}</small></span>`;
   $("#thread").innerHTML = "";
   $("#input").value = "";
   setComposer(false);
@@ -163,7 +167,7 @@ $("#chat-back").addEventListener("click", closeChat);
 
 function startScripted(sc) {
   chat = { mode: "script", sc, chars: sc.chars, turn: 0, history: [], userTurns: 0, token: Symbol() };
-  openChatView(sc.group || CHARACTERS[sc.chars[0]].name, sc.chars);
+  openChatView(sc.group ? sc.group.replace(/^\S+\s/, "") : CHARACTERS[sc.chars[0]].name, sc.chars);
   $("#hint-btn").hidden = false;
   for (const m of sc.history || []) addBubble({ ...m, text: m.t, ann: m, old: true });
   if (sc.history) addNote("Bạn chưa trả lời tin này. Hai ngày sau…");
@@ -193,7 +197,7 @@ async function typing(from, text) {
   scrollDown();
   const st = $("#chat-status");
   const prev = st?.textContent;
-  if (st) st.textContent = `${CHARACTERS[from].name} đang nhập…`;
+  if (st) st.textContent = `${CHARACTERS[from].name} đang nhập...`;
   await sleep(Math.min(3200, 700 + text.length * 35));
   el.remove();
   if (st) st.textContent = prev;
@@ -240,7 +244,7 @@ function setComposer(on) {
   $("#input").disabled = !on;
   $("#send").disabled = !on;
   $("#hint-btn").disabled = !on;
-  $("#input").placeholder = on ? "Nhắn tin…" : "…";
+  $("#input").placeholder = on ? "Nhắn tin" : "";
 }
 
 // Giải thích một tin nhắn: dịch, slang, tone, gợi ý trả lời
@@ -251,11 +255,11 @@ function explain(m) {
   const replies = m.replies || [];
   openSheet(`
     <div class="sheet-msg"><div class="bubble">${esc(m.text)}</div></div>
-    ${tone ? `<div class="tone tone-${a.tone}">${tone.emoji} Tone: <b>${tone.vi}</b> <small>(${a.tone})</small></div>` : ""}
-    <h3>🇻🇳 Nghĩa</h3><p class="vi">${esc(a.vi || "")}</p>
-    ${terms.length ? `<h3>🔎 Slang & viết tắt</h3><div class="terms">${terms.map(termCard).join("")}</div>` : ""}
-    ${replies.length ? `<h3>💬 Gợi ý trả lời</h3><div class="replies">${replies.map((r, i) => `
-      <button class="reply" data-i="${i}"><span class="lvl">${["🟢 An toàn", "🟡 Tự nhiên", "🔴 Táo bạo"][(Number(r.level) || i + 1) - 1] || ""}</span><b>${esc(r.en)}</b><small>${esc(r.vi)}</small></button>`).join("")}</div>
+    ${tone ? `<div class="tag-line"><span class="pill tone-${a.tone}">Tone: ${tone.vi} (${a.tone})</span></div>` : ""}
+    <h3>Nghĩa</h3><p class="vi">${esc(a.vi || "")}</p>
+    ${terms.length ? `<h3>Slang và viết tắt</h3><div class="terms">${terms.map((e) => termCard(e)).join("")}</div>` : ""}
+    ${replies.length ? `<h3>Gợi ý trả lời</h3><div class="replies">${replies.map((r, i) => { const lv = Number(r.level) || i + 1; return `
+      <button class="reply" data-i="${i}"><span class="lvl lvl-${lv}">${LEVELS[lv - 1] || ""}</span><b>${esc(r.en)}</b><small>${esc(r.vi)}</small></button>`; }).join("")}</div>
       <p class="muted small">Chạm để chép vào ô nhắn tin. Bạn có thể sửa lại trước khi gửi.</p>` : ""}
     <button class="btn ghost" data-close>Đóng</button>`);
   $("#sheet-body").querySelectorAll(".reply").forEach((b) => b.addEventListener("click", () => {
@@ -266,11 +270,11 @@ function explain(m) {
     if (!$("#input").disabled) $("#input").focus();
   }));
 }
-function termCard(e) {
-  return `<div class="term"><div class="t"><b>${esc(e.term === "sooo" ? "sooo / yesss / heyyy" : e.term)}</b><span class="cat">${CATEGORIES[e.cat]?.vi ?? ""}</span></div>
+function termCard(e, extra = "") {
+  return `<div class="term"><div class="t"><b>${esc(e.term === "sooo" ? "sooo / yesss / heyyy" : e.term)}</b><span class="pill">${CATEGORIES[e.cat]?.vi ?? ""}</span></div>
     <div>${esc(e.vi)}</div>
-    <div class="ex">“${esc(e.ex)}”</div>
-    <div class="meta"><span>🎚️ ${esc(FORMALITY[e.f] || "")}</span><span>👥 ${esc(WHO[e.who] || "")}</span></div></div>`;
+    <div class="ex">"${esc(e.ex)}"</div>
+    <div class="meta"><span class="pill">${esc(FORM_SHORT[e.f] || "")}</span><span class="pill">${esc(WHO_SHORT[e.who] || "")}</span>${extra}</div></div>`;
 }
 
 $("#hint-btn").addEventListener("click", () => chat?.lastThem && explain({ ...chat.lastThem, replies: chat.replies }));
@@ -319,7 +323,7 @@ function attachFeedback(row, fb) {
   const chip = document.createElement("button");
   const score = Number(fb.score);
   chip.className = `fb-chip s${score}`;
-  chip.innerHTML = `${"★".repeat(score)}${"☆".repeat(5 - score)} · ${fb.grammar.length ? `❌ ${fb.grammar.length}` : "✅"} · R${fb.react ? "✓" : "✗"} A${fb.add ? "✓" : "✗"} A${fb.ask ? "✓" : "✗"}`;
+  chip.innerHTML = `<span>Tự nhiên ${score}/5 · ${fb.grammar.length ? `${fb.grammar.length} lỗi` : "Không lỗi"} · Xem nhận xét</span>`;
   chip.addEventListener("click", () => showFeedback(fb, $(".bubble", row).textContent));
   row.append(chip);
   scrollDown();
@@ -329,18 +333,18 @@ function showFeedback(fb, text) {
   const score = Number(fb.score);
   openSheet(`
     <div class="sheet-msg me"><div class="bubble">${esc(text)}</div></div>
-    <h3>✍️ Ngữ pháp</h3>
-    ${fb.grammar.length ? fb.grammar.map((g) => `<div class="gfix"><div>❌ <s>${esc(g.wrong)}</s> → ✅ <b>${esc(g.right)}</b></div><small>${esc(g.why)}</small></div>`).join("") : `<p>✅ Không thấy lỗi ngữ pháp.</p>`}
+    <h3>Ngữ pháp</h3>
+    ${fb.grammar.length ? fb.grammar.map((g) => `<div class="gfix"><div><span class="w">${esc(g.wrong)}</span><span class="arrow">→</span><span class="r">${esc(g.right)}</span></div><small>${esc(g.why)}</small></div>`).join("") : `<p>Không thấy lỗi ngữ pháp.</p>`}
     ${fb.fixed ? `<p class="small">Câu đã sửa: <b>${esc(fb.fixed)}</b></p>` : ""}
-    <h3>🗣️ Người bản xứ sẽ nói</h3>
+    <h3>Người bản xứ sẽ nói</h3>
     <div class="native"><b>${esc(fb.native)}</b>${fb.native_vi ? `<small>${esc(fb.native_vi)}</small>` : ""}</div>
-    <h3>⭐ Độ tự nhiên: ${score}/5</h3>
-    <div class="stars s${score}">${"★".repeat(score)}${"☆".repeat(5 - score)}</div>
+    <h3>Độ tự nhiên</h3>
+    <div class="meter s${score}"><div class="num">${score}<span>/5</span></div><div class="segs">${[1, 2, 3, 4, 5].map((k) => `<i class="${k <= score ? "on" : ""}"></i>`).join("")}</div></div>
     <p>${esc(fb.score_why)}</p>
-    <h3>🔁 Giữ câu chuyện tiếp tục?</h3>
-    <div class="raa"><span class="${fb.react ? "y" : "n"}">React ${fb.react ? "✓" : "✗"}</span><span class="${fb.add ? "y" : "n"}">Add ${fb.add ? "✓" : "✗"}</span><span class="${fb.ask ? "y" : "n"}">Ask ${fb.ask ? "✓" : "✗"}</span></div>
+    <h3>Giữ câu chuyện tiếp tục</h3>
+    <div class="raa"><span class="${fb.react ? "y" : "n"}">React</span><span class="${fb.add ? "y" : "n"}">Add</span><span class="${fb.ask ? "y" : "n"}">Ask</span></div>
     <p>${esc(fb.flow_tip)}</p>
-    ${fb.offline ? `<p class="muted small">${fb.error ? `⚠️ ${esc(fb.error)} Đang dùng phản hồi cơ bản (offline).` : "Phản hồi cơ bản (offline). Thêm API key Claude trong ⚙️ Cài đặt để được nhận xét chi tiết bằng AI."}</p>` : ""}
+    ${fb.offline ? `<p class="muted small">${fb.error ? `${esc(fb.error)} Đang dùng nhận xét cơ bản (offline).` : "Nhận xét cơ bản (offline). Thêm API key Claude trong Cài đặt để được nhận xét chi tiết bằng AI."}</p>` : ""}
     <button class="btn ghost" data-close>Đóng</button>`);
 }
 
@@ -352,7 +356,7 @@ function finishConvo() {
   markActive();
   const el = addNote("");
   el.className = "done";
-  el.innerHTML = `🎉 <b>Hoàn thành cuộc trò chuyện!</b><br><small>Chạm vào ⭐ dưới mỗi tin của bạn để xem phản hồi.</small>
+  el.innerHTML = `<b>Hoàn thành cuộc trò chuyện</b><small class="muted">Chạm vào dòng nhận xét dưới mỗi tin của bạn để xem lại.</small>
     <div class="row-btns">${c.mode === "script" ? `<button class="btn" id="again">Làm lại</button>` : ""}<button class="btn ghost" id="leave">Về trang chính</button></div>`;
   $("#again")?.addEventListener("click", () => startScripted(c.sc));
   $("#leave").addEventListener("click", closeChat);
@@ -369,15 +373,16 @@ function openFreeChatSetup() {
   }
   let sel = "mia";
   openSheet(`
-    <h3>Chọn nhân vật</h3>
+    <h2 class="title">Chat tự do</h2>
+    <h3>Nhân vật</h3>
     <div class="pick-chars">${Object.entries(CHARACTERS).map(([id, c]) => `<button class="pc${id === sel ? " on" : ""}" data-id="${id}">${avatar(id)}<b>${c.name}</b><small>${esc(c.role)}</small></button>`).join("")}
-      <button class="pc" data-id="group"><span class="av" style="background:#38BDF8">👥</span><b>Nhóm chat</b><small>Mia, Sam, Derek</small></button></div>
+      <button class="pc" data-id="group">${groupAvatar(["sam", "mia", "derek"])}<b>Nhóm chat</b><small>Mia, Sam, Derek</small></button></div>
     <h3>Chủ đề</h3>
-    <div class="topics">${SCENARIOS.map((s, i) => `<label><input type="radio" name="topic" value="${esc(s.en)}" ${i === 0 ? "checked" : ""}> ${s.emoji} ${esc(s.title)} <small class="muted">(${esc(s.en)})</small></label>`).join("")}
-      <label><input type="radio" name="topic" value="custom"> ✏️ Tự nhập</label>
+    <div class="topics">${SCENARIOS.map((s, i) => `<label><input type="radio" name="topic" value="${esc(s.en)}" ${i === 0 ? "checked" : ""}> ${esc(s.title)} <small class="muted">${esc(s.en)}</small></label>`).join("")}
+      <label><input type="radio" name="topic" value="custom"> Tự nhập chủ đề</label>
       <input id="custom-topic" class="field" placeholder="vd: planning a trip to Big Bear" hidden></div>
-    <button class="btn" id="go">Bắt đầu chat</button>
-    <p class="muted small">Mỗi lượt gọi Claude (${"claude-opus-5-5"}) bằng API key của bạn và có tính phí theo tài khoản của bạn.</p>`);
+    <button class="btn accent wide" id="go">Bắt đầu chat</button>
+    <p class="muted small">Mỗi lượt gọi Claude (claude-opus-5-5) bằng API key của bạn và tính phí vào tài khoản của bạn.</p>`);
   const body = $("#sheet-body");
   body.querySelectorAll(".pc").forEach((b) => b.addEventListener("click", () => {
     sel = b.dataset.id;
@@ -394,9 +399,9 @@ function openFreeChatSetup() {
 
 async function startAI(chars, topic) {
   chat = { mode: "ai", chars, topic, history: [], userTurns: 0, replies: [] };
-  openChatView(chars.length > 1 ? "👥 group chat" : CHARACTERS[chars[0]].name, chars);
+  openChatView(chars.length > 1 ? "Nhóm chat" : CHARACTERS[chars[0]].name, chars);
   $("#hint-btn").hidden = false;
-  addNote(`Chủ đề: ${topic} · Bấm ‹ để kết thúc`);
+  addNote(`Chủ đề: ${topic} · Bấm Quay lại để kết thúc`);
   await aiTurn();
 }
 
@@ -424,7 +429,7 @@ async function aiTurn() {
   } catch (e) {
     wait.remove();
     if (c !== chat) return;
-    const n = addNote(`⚠️ ${e.message} `);
+    const n = addNote(`${e.message} `);
     const retry = document.createElement("button");
     retry.className = "btn sm";
     retry.textContent = "Thử lại";
@@ -442,13 +447,13 @@ function renderBank() {
   const due = dueTerms();
   const list = terms.filter((t) => (bankFilter === "all" || entry(t).cat === bankFilter) && (!bankQuery || (t + " " + entry(t).vi).toLowerCase().includes(bankQuery)));
   $("#main").innerHTML = `
-    <div class="stat-row"><div><b>${terms.length}</b><small>từ đã gặp</small></div><div><b>${learnedCount()}</b><small>đã thuộc</small></div><div><b>${due.length}</b><small>cần ôn hôm nay</small></div></div>
-    <button class="btn wide" id="review" ${due.length ? "" : "disabled"}>🃏 Ôn thẻ (${due.length})</button>
-    ${terms.length ? `<button class="btn ghost wide" id="review-all">Ôn tất cả ${terms.length} từ</button>` : ""}
-    <input class="field" id="q" placeholder="🔍 Tìm từ…" value="${esc(bankQuery)}">
+    <div class="stats"><div class="stat"><b>${terms.length}</b><small>đã gặp</small></div><div class="stat"><b>${learnedCount()}</b><small>đã thuộc</small></div><div class="stat"><b>${due.length}</b><small>cần ôn</small></div></div>
+    <button class="btn accent wide" id="review" ${due.length ? "" : "disabled"}>Ôn thẻ đến hạn (${due.length})</button>
+    ${terms.length ? `<button class="btn ghost wide" id="review-all" style="margin-top:8px">Ôn tất cả ${terms.length} từ</button>` : ""}
+    <input class="field" id="q" placeholder="Tìm từ" value="${esc(bankQuery)}">
     <div class="chips">${[["all", "Tất cả"], ...Object.entries(CATEGORIES).map(([k, v]) => [k, v.vi])].map(([k, v]) => `<button class="chip${bankFilter === k ? " on" : ""}" data-k="${k}">${esc(v)}</button>`).join("")}</div>
     ${terms.length ? "" : `<p class="empty">Kho từ còn trống. Mở một kịch bản chat, từ mới sẽ tự động được lưu vào đây.</p>`}
-    <div class="terms">${list.map((t) => { const b = S.bank[t]; return termCard(entry(t)).replace('<div class="meta">', `<div class="meta"><span>📆 ${b.stage >= INTERVALS.length ? "Đã thuộc ✓" : `Giai đoạn ${b.stage + 1}/${INTERVALS.length}`} · ôn ${b.due <= today() ? "hôm nay" : b.due}</span>`); }).join("")}</div>`;
+    <div class="terms">${list.map((t) => { const b = S.bank[t]; return termCard(entry(t), `<span class="pill">${b.stage >= INTERVALS.length ? "Đã thuộc" : `Giai đoạn ${b.stage + 1}/${INTERVALS.length}`} · ôn ${b.due <= today() ? "hôm nay" : b.due}</span>`); }).join("")}</div>`;
   $("#review")?.addEventListener("click", () => flashcards(shuffle(due)));
   $("#review-all")?.addEventListener("click", () => flashcards(shuffle(terms), true));
   $("#q").addEventListener("input", (e) => { bankQuery = e.target.value.toLowerCase(); const pos = e.target.selectionStart; renderBank(); const q = $("#q"); q.focus(); q.setSelectionRange(pos, pos); });
@@ -460,16 +465,17 @@ function flashcards(queue, practice = false) {
   const step = () => {
     if (i >= queue.length) {
       save();
-      openSheet(`<div class="center"><div class="big">🎉</div><h3>Xong ${queue.length} thẻ</h3><p>Nhớ ${right}/${queue.length}. ${practice ? "" : "Thẻ đã nhớ sẽ quay lại sau 1 → 3 → 7 ngày."}</p><button class="btn" data-close>Đóng</button></div>`);
+      openSheet(`<div class="center"><h3>Đã ôn xong</h3><div class="result-num">${right}<span>/${queue.length}</span></div><p class="muted">${practice ? "Số thẻ bạn nhớ." : "Thẻ đã nhớ sẽ quay lại sau 1, 3 rồi 7 ngày."}</p><button class="btn wide" data-close>Đóng</button></div>`);
       if (tab === "bank") renderBank();
       return;
     }
     const t = queue[i], e = entry(t);
     openSheet(`
-      <div class="fc-progress">${i + 1} / ${queue.length}</div>
-      <div class="flash" id="flash"><div class="front"><b>${esc(e.term === "sooo" ? "sooo / yesss / heyyy" : e.term)}</b><div class="ex">“${esc(e.ex)}”</div><small class="muted">Chạm để lật</small></div>
-        <div class="back" hidden><b>${esc(e.vi)}</b><small>${esc(CATEGORIES[e.cat]?.vi)} · ${esc(FORMALITY[e.f])}</small><small>${esc(WHO[e.who])}</small></div></div>
-      <div class="row-btns" id="grade" hidden><button class="btn bad" data-ok="0">😵 Quên</button><button class="btn good" data-ok="1">😎 Nhớ</button></div>
+      <div class="fc-progress"><span>Thẻ ${i + 1} / ${queue.length}</span><span>${esc(CATEGORIES[e.cat]?.vi)}</span></div>
+      <div class="track"><i style="width:${(i / queue.length) * 100}%"></i></div>
+      <div class="flash" id="flash"><div class="front"><b>${esc(e.term === "sooo" ? "sooo / yesss / heyyy" : e.term)}</b><div class="ex">"${esc(e.ex)}"</div><span class="hint">Chạm để lật thẻ</span></div>
+        <div class="back" hidden><b>${esc(e.vi)}</b><small>${esc(FORMALITY[e.f])}</small><small>${esc(WHO[e.who])}</small></div></div>
+      <div class="row-btns" id="grade" hidden><button class="btn bad" data-ok="0">Quên</button><button class="btn good" data-ok="1">Nhớ</button></div>
       <button class="btn ghost" data-close>Dừng</button>`);
     $("#flash").addEventListener("click", () => { $("#flash .back").hidden = false; $("#grade").hidden = false; });
     $("#grade").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
@@ -519,10 +525,10 @@ function renderQuiz() {
   const r = S.quiz[today()];
   const past = Object.entries(S.quiz).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 7);
   $("#main").innerHTML = `
-    <div class="hero"><div class="big">🎯</div><h2>10 câu hôm nay</h2><p>Dịch tin nhắn · Chọn câu trả lời tự nhiên · Giải mã viết tắt</p>
-      ${r ? `<p class="score">Hôm nay: <b>${r.best}/10</b> ✓</p>` : ""}
-      <button class="btn" id="start">${r ? "Làm lại" : "Bắt đầu"}</button></div>
-    ${past.length ? `<h2>7 ngày gần đây</h2><div class="history">${past.map(([d, v]) => `<div><span>${d}</span><b>${v.best}/10</b></div>`).join("")}</div>` : ""}`;
+    <div class="hero"><div class="k">Hôm nay</div><div class="h">10 câu hỏi</div><p>Dịch tin nhắn, chọn câu trả lời tự nhiên, giải mã viết tắt.</p>
+      ${r ? `<p style="margin-top:10px">Điểm cao nhất hôm nay: <b>${r.best}/10</b></p>` : ""}
+      <button class="btn accent wide" id="start">${r ? "Làm lại" : "Bắt đầu"}</button></div>
+    ${past.length ? `<h2>7 ngày gần đây</h2><div class="list">${past.map(([d, v]) => `<div class="kv"><span>${d}</span><b>${v.best}/10</b></div>`).join("")}</div>` : ""}`;
   $("#start").addEventListener("click", () => runQuiz(buildQuiz()));
 }
 
@@ -533,17 +539,18 @@ function runQuiz(qs) {
       const d = today();
       S.quiz[d] = { best: Math.max(score, S.quiz[d]?.best || 0), last: score };
       markActive();
-      openSheet(`<div class="center"><div class="big">${score >= 8 ? "🏆" : score >= 5 ? "👍" : "💪"}</div><h3>${score}/${qs.length} câu đúng</h3><p>${score >= 8 ? "Đỉnh quá! Bạn nhắn tin như người bản xứ rồi." : "Tiếp tục luyện chat và ôn thẻ nhé!"}</p><button class="btn" data-close>Đóng</button></div>`);
+      openSheet(`<div class="center"><h3>Kết quả</h3><div class="result-num">${score}<span>/${qs.length}</span></div><p class="muted">${score >= 8 ? "Rất tốt! Bạn nhắn tin như người bản xứ rồi." : "Tiếp tục luyện chat và ôn thẻ nhé."}</p><button class="btn wide" data-close>Đóng</button></div>`);
       if (tab === "quiz") renderQuiz();
       return;
     }
     const q = qs[i];
     openSheet(`
-      <div class="fc-progress">${i + 1} / ${qs.length} · ${esc(q.type)}</div>
+      <div class="fc-progress"><span>Câu ${i + 1} / ${qs.length}</span><span>${esc(q.type)}</span></div>
+      <div class="track"><i style="width:${(i / qs.length) * 100}%"></i></div>
       <div class="qprompt">${q.prompt}</div>
       <div class="opts">${q.opts.map((o, k) => `<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
       <div id="why" hidden></div>
-      <button class="btn" id="next" hidden>${i + 1 < qs.length ? "Câu tiếp →" : "Xem kết quả"}</button>`);
+      <button class="btn wide" id="next" hidden>${i + 1 < qs.length ? "Câu tiếp theo" : "Xem kết quả"}</button>`);
     $("#sheet-body").querySelectorAll(".opt").forEach((b) => b.addEventListener("click", () => {
       const k = Number(b.dataset.k);
       const ok = k === q.a;
@@ -551,7 +558,7 @@ function runQuiz(qs) {
       if (q.term) meet([q.term]);
       $("#sheet-body").querySelectorAll(".opt").forEach((x, j) => { x.disabled = true; x.classList.toggle("right", j === q.a); x.classList.toggle("wrong", j === k && !ok); });
       $("#why").hidden = false;
-      $("#why").innerHTML = `<p class="${ok ? "ok" : "no"}">${ok ? "✅ Chính xác!" : "❌ Chưa đúng."}</p><p class="small">${esc(q.why)}</p>`;
+      $("#why").innerHTML = `<p class="${ok ? "ok" : "no"}">${ok ? "Chính xác" : "Chưa đúng"}</p><p class="small">${esc(q.why)}</p>`;
       $("#next").hidden = false;
     }));
     $("#next").addEventListener("click", () => { i++; step(); });
@@ -561,16 +568,17 @@ function runQuiz(qs) {
 
 // ---------- Bài học ----------
 function renderLessons() {
-  $("#title").textContent = "Bài học kỹ năng";
+  $("#title").textContent = "Bài học";
   $("#main").innerHTML = `<p class="lead">Mỗi bài khoảng 2 phút. Giải thích bằng tiếng Việt, ví dụ bằng tiếng Anh.</p>
-    <div class="cards">${LESSONS.map((l, i) => `<button class="card lesson" data-i="${i}"><span class="lnum">${l.emoji}</span><span class="info"><b>${esc(l.title)}</b><small class="muted">${l.sections.map((s) => esc(s.h)).join(" · ")}</small></span>${S.lessons[l.id] ? `<span class="badge">✓</span>` : ""}</button>`).join("")}</div>`;
+    <h2>Kỹ năng nhắn tin</h2>
+    <div class="list">${LESSONS.map((l, i) => `<button class="item lesson" data-i="${i}"><span class="av" style="background:var(--surface-2);color:var(--muted)">${String(i + 1).padStart(2, "0")}</span><span class="info"><b>${esc(l.title)}</b><small>${l.sections.map((s) => esc(s.h)).join(" · ")}</small></span>${S.lessons[l.id] ? `<span class="meta-r ok">Đã học</span>` : ""}</button>`).join("")}</div>`;
   $("#main").querySelectorAll(".lesson").forEach((b) => b.addEventListener("click", () => openLesson(LESSONS[b.dataset.i])));
 }
 function openLesson(l) {
   openSheet(`
-    <h2>${l.emoji} ${esc(l.title)}</h2>
+    <h2 class="title">${esc(l.title)}</h2>
     <div class="lesson-body">${l.sections.map((s) => `<h3>${esc(s.h)}</h3>${s.body}`).join("")}</div>
-    <h3>✅ Kiểm tra nhanh</h3><p>${esc(l.check.q)}</p>
+    <h3>Kiểm tra nhanh</h3><p>${esc(l.check.q)}</p>
     <div class="opts">${l.check.opts.map((o, k) => `<button class="opt" data-k="${k}">${esc(o)}</button>`).join("")}</div>
     <div id="why" hidden></div>
     <button class="btn ghost" data-close>Đóng</button>`);
@@ -578,7 +586,7 @@ function openLesson(l) {
     const k = Number(b.dataset.k), ok = k === l.check.a;
     $("#sheet-body").querySelectorAll(".opt").forEach((x, j) => { x.disabled = true; x.classList.toggle("right", j === l.check.a); x.classList.toggle("wrong", j === k && !ok); });
     $("#why").hidden = false;
-    $("#why").innerHTML = `<p class="${ok ? "ok" : "no"}">${ok ? "✅ Chính xác!" : "❌ Chưa đúng."}</p><p class="small">${esc(l.check.why)}</p>`;
+    $("#why").innerHTML = `<p class="${ok ? "ok" : "no"}">${ok ? "Chính xác" : "Chưa đúng"}</p><p class="small">${esc(l.check.why)}</p>`;
     if (!S.lessons[l.id]) { S.lessons[l.id] = today(); markActive(); }
     if (tab === "lessons") renderLessons();
   }));
@@ -591,40 +599,40 @@ function renderProgress() {
   const words = Object.keys(S.bank).filter((t) => entry(t)).length;
   const byCat = Object.keys(CATEGORIES).map((c) => [c, Object.keys(S.bank).filter((t) => entry(t)?.cat === c).length, Object.values(LEXICON).filter((e) => e.cat === c).length]);
   $("#main").innerHTML = `
-    <div class="tiles">
-      <div class="tile"><b>🔥 ${streak()}</b><small>ngày liên tiếp</small></div>
-      <div class="tile"><b>📚 ${words}</b><small>từ đã gặp</small></div>
-      <div class="tile"><b>🧠 ${learnedCount()}</b><small>từ đã thuộc</small></div>
-      <div class="tile"><b>💬 ${S.convos}</b><small>cuộc trò chuyện</small></div>
-      <div class="tile"><b>🎯 ${Object.keys(S.quiz).length}</b><small>ngày làm quiz</small></div>
-      <div class="tile"><b>🎓 ${Object.keys(S.lessons).length}/${LESSONS.length}</b><small>bài học</small></div>
+    <div class="stats">
+      <div class="stat"><b>${streak()}</b><small>ngày liên tiếp</small></div>
+      <div class="stat"><b>${words}</b><small>từ đã gặp</small></div>
+      <div class="stat"><b>${learnedCount()}</b><small>từ đã thuộc</small></div>
+      <div class="stat"><b>${S.convos}</b><small>cuộc trò chuyện</small></div>
+      <div class="stat"><b>${Object.keys(S.quiz).length}</b><small>ngày làm quiz</small></div>
+      <div class="stat"><b>${Object.keys(S.lessons).length}/${LESSONS.length}</b><small>bài học</small></div>
     </div>
     <h2>14 ngày qua</h2>
     <div class="days">${days.map((d) => `<span class="${S.activity[d] ? "on" : ""}${d === today() ? " today" : ""}" title="${d}">${Number(d.slice(8))}</span>`).join("")}</div>
     <h2>Từ vựng theo nhóm</h2>
-    <div class="bars">${byCat.map(([c, n, total]) => `<div class="bar"><span>${esc(CATEGORIES[c].vi)}</span><div><i style="width:${Math.min(100, (n / Math.max(1, total)) * 100)}%"></i></div><b>${n}</b></div>`).join("")}</div>
+    <div class="bars">${byCat.map(([c, n, total]) => `<div class="bar"><span>${esc(CATEGORIES[c].vi)}</span><b>${n}/${total}</b><div><i style="width:${Math.min(100, (n / Math.max(1, total)) * 100)}%"></i></div></div>`).join("")}</div>
     <h2>Kịch bản</h2>
-    <div class="history">${SCENARIOS.map((s) => `<div><span>${s.emoji} ${esc(s.title)}</span><b>${S.done[s.id] ? `✓ ×${S.done[s.id]}` : "–"}</b></div>`).join("")}</div>
-    <p class="muted small">Tiến độ được lưu trong trình duyệt này.</p>`;
+    <div class="list">${SCENARIOS.map((s) => `<div class="kv"><span>${esc(s.title)}</span>${S.done[s.id] ? `<b class="ok">Đã xong${S.done[s.id] > 1 ? ` ×${S.done[s.id]}` : ""}</b>` : `<span class="muted">Chưa học</span>`}</div>`).join("")}</div>
+    <p class="muted small" style="margin-top:16px">Tiến độ được lưu trong trình duyệt này.</p>`;
 }
 
 // ---------- Cài đặt ----------
 function openSettings() {
   openSheet(`
-    <h2>⚙️ Cài đặt</h2>
+    <h2 class="title">Cài đặt</h2>
     <h3>Giao diện</h3>
-    <div class="seg">${[["auto", "Tự động"], ["light", "☀️ Sáng"], ["dark", "🌙 Tối"]].map(([k, v]) => `<button class="${S.theme === k ? "on" : ""}" data-theme="${k}">${v}</button>`).join("")}</div>
+    <div class="seg">${[["auto", "Tự động"], ["light", "Sáng"], ["dark", "Tối"]].map(([k, v]) => `<button class="${S.theme === k ? "on" : ""}" data-theme="${k}">${v}</button>`).join("")}</div>
     <h3>API key Claude (không bắt buộc)</h3>
     <p class="small">Các kịch bản có sẵn chạy không cần key. Có key thì bạn được <b>chat tự do với AI</b> và nhận <b>phản hồi AI</b> chi tiết cho từng câu. Lấy key tại <a href="https://platform.claude.com/settings/keys" target="_blank" rel="noopener">platform.claude.com</a>.</p>
     <input class="field" id="key" type="password" autocomplete="off" placeholder="sk-ant-…" value="${esc(S.apiKey)}">
     <p class="muted small">Key chỉ lưu trong trình duyệt của bạn và được gửi thẳng tới api.anthropic.com. Đừng dùng tính năng này trên máy dùng chung.</p>
-    <div class="row-btns"><button class="btn" id="save-key">Lưu key</button>${S.apiKey ? `<button class="btn ghost" id="del-key">Xóa key</button>` : ""}</div>
+    <div class="row-btns"><button class="btn accent" id="save-key">Lưu key</button>${S.apiKey ? `<button class="btn ghost" id="del-key">Xóa key</button>` : ""}</div>
     <h3>Dữ liệu</h3>
-    <div class="row-btns"><button class="btn ghost" id="export">⬇️ Xuất tiến độ</button><button class="btn bad" id="reset">Xóa toàn bộ tiến độ</button></div>
+    <div class="row-btns"><button class="btn ghost" id="export">Xuất tiến độ</button><button class="btn bad" id="reset">Xóa toàn bộ tiến độ</button></div>
     <button class="btn ghost" data-close>Đóng</button>`);
   const body = $("#sheet-body");
   body.querySelectorAll("[data-theme]").forEach((b) => b.addEventListener("click", () => { S.theme = b.dataset.theme; save(); applyTheme(); body.querySelectorAll("[data-theme]").forEach((x) => x.classList.toggle("on", x === b)); }));
-  $("#save-key").addEventListener("click", () => { S.apiKey = $("#key").value.trim(); save(); toast(S.apiKey ? "Đã lưu key ✓" : "Đã xóa key"); closeSheet(); if (tab === "chat" && !chat) renderHome(); });
+  $("#save-key").addEventListener("click", () => { S.apiKey = $("#key").value.trim(); save(); toast(S.apiKey ? "Đã lưu key" : "Đã xóa key"); closeSheet(); if (tab === "chat" && !chat) renderHome(); });
   $("#del-key")?.addEventListener("click", () => { S.apiKey = ""; save(); toast("Đã xóa key"); closeSheet(); if (tab === "chat" && !chat) renderHome(); });
   $("#export").addEventListener("click", () => {
     const { apiKey, ...data } = S;
