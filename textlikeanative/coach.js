@@ -42,7 +42,8 @@ function overlap(a, b) {
   return B.filter((w) => A.has(w)).length / Math.max(1, Math.max(A.size, B.length));
 }
 
-export function offlineFeedback(reply, suggestions = [], isLastTurn = false) {
+export function offlineFeedback(reply, suggestions = [], isLastTurn = false, lang = "en") {
+  if (lang !== "en") return cjkFeedback(reply, suggestions, isLastTurn, lang);
   const text = reply.trim();
   const grammar = [];
   let fixed = text;
@@ -97,4 +98,63 @@ export function offlineFeedback(reply, suggestions = [], isLastTurn = false) {
 function contract(s) {
   const map = { "i am": "I'm", "you are": "you're", "it is": "it's", "that is": "that's", "do not": "don't", "does not": "doesn't", "did not": "didn't", "i will": "I'll", "can not": "can't", cannot: "can't", "i have not": "I haven't", "we are": "we're", "they are": "they're", "is not": "isn't", "are not": "aren't" };
   return `${s} → ${map[s] ?? s}`;
+}
+
+// Tiếng Nhật, Trung, Hàn: không kiểm tra ngữ pháp offline, chỉ xét React → Add → Ask,
+// độ giống câu gợi ý và vài lỗi xưng hô hay gặp.
+const CJK = {
+  ja: {
+    react: /^(え|へー|まじ|マジ|うわ|わー|いいね|なるほど|さすが|おー|やった|草|笑|w|ありがとう|あざ|りょ|了解|承知|お疲れ|それな|わかる|すご|ほんと|本当|ごめん|すみません|おめでとう|楽しみ)/,
+    ask: /[?？]|(か|の|かな|よね)[。！!]?$|どう|何|いつ|どこ|誰/,
+    flags: [[/あなた/, "Gọi \"あなた\" nghe xa cách. Người Nhật thường bỏ chủ ngữ hoặc gọi họ + さん."]],
+  },
+  zh: {
+    react: /^(哈|哇|好|嗯嗯|真的|太|谢谢|收到|牛|666|我去|天|啊|好家伙|绝|恭喜|没事|不好意思|对)/,
+    ask: /[?？]|吗|呢|怎么|什么|几|哪|要不要|好不好|行不行|谁/,
+    flags: [[/^(嗯|哦|好)[。.!！]?$/, "Chỉ một chữ 嗯 / 哦 / 好 nghe lạnh lùng. Thêm chữ cho mềm: 好的～, 嗯嗯, 好呀!"], [/🙂/, "🙂 trên WeChat thường mang nghĩa mỉa mai."]],
+  },
+  ko: {
+    react: /^(ㅋ|ㅎ|헐|대박|오|와|아|좋|감사|고마|넵|네|진짜|그니까|ㅇㅋ|ㅇㅇ|ㅠ|미안|죄송|축하)/,
+    ask: /[?？]|까|나요|어때|뭐|언제|어디|누구|할래|갈래|볼래/,
+    flags: [[/당신/, "\"당신\" nghe lạ, có khi thô. Gọi tên + 씨, chức danh + 님, hoặc bỏ chủ ngữ."], [/^ㅋ$/, "Chỉ một chữ ㅋ có thể nghe nhạt, như cười gượng."]],
+  },
+};
+
+function cjkFeedback(reply, suggestions, isLastTurn, lang) {
+  const text = reply.trim();
+  const rule = CJK[lang];
+  const chars = [...text.replace(/\s/g, "")];
+  const exact = suggestions.find((s) => s.en.trim() === text);
+  const sim = (a, b) => { const A = new Set([...a]); const B = [...b]; return B.filter((c) => A.has(c)).length / Math.max(1, Math.max(A.size, B.length)); };
+  const best = suggestions.slice().sort((a, b) => sim(text, b.en) - sim(text, a.en))[0];
+
+  const notes = rule.flags.filter(([re]) => re.test(text)).map(([, why]) => why);
+  const react = rule.react.test(text) || EMOJI.test(text);
+  const ask = rule.ask.test(text);
+  const add = chars.length >= 8;
+  const short = chars.length <= 2 && !isLastTurn;
+  if (short) notes.push("Tin hơi ngắn, dễ làm câu chuyện dừng lại.");
+
+  let score = exact ? 5 : 4 - (short ? 2 : 0) - Math.min(1, notes.length - (short ? 1 : 0)) - (!react && !add && !ask ? 1 : 0);
+  score = Math.max(1, Math.min(5, score));
+
+  let flowTip;
+  if (isLastTurn) flowTip = "Câu chuyện đang kết thúc: một lời chào vui vẻ là đủ.";
+  else if (!ask) flowTip = "Thêm một câu hỏi ngắn ở cuối để người kia có lý do trả lời tiếp.";
+  else if (!react) flowTip = "Mở đầu bằng một phản ứng ngắn để nghe tự nhiên và thân thiện hơn.";
+  else flowTip = "Tốt lắm! Bạn vừa phản ứng vừa hỏi lại, câu chuyện sẽ tiếp tục.";
+
+  return {
+    offline: true,
+    noGrammar: true,
+    grammar: [],
+    native: exact ? text : best ? best.en : text,
+    native_reading: exact ? exact.r : best ? best.r : "",
+    native_vi: exact ? exact.vi : best ? best.vi : "",
+    fixed: null,
+    score: String(score),
+    score_why: exact ? "Đây là câu gợi ý, rất tự nhiên." : notes.length ? notes.join(" ") : "Không thấy lỗi xưng hô hay gặp. Điểm offline chỉ là ước lượng.",
+    react, add, ask,
+    flow_tip: flowTip,
+  };
 }
